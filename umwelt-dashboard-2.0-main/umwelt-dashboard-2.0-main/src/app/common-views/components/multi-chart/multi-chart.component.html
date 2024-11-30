@@ -1,0 +1,522 @@
+<div fxLayout="row" fxLayoutWrap class="enps-filter">
+  <div fxFlex="100" fxFlex.lt-sm="100" fxFlex.sm="50" class="mat-elevation-z4">
+    <div>
+      <button mat-icon-button [matMenuTriggerFor]="appMenu">
+        <mat-icon class="filter-icon">filter_list</mat-icon>
+        <strong class="add-filter">Add Filters</strong>
+      </button>
+      <mat-menu #appMenu="matMenu">
+        <div [formGroup]="filterFormGroup" class="columns-menu">
+          <ng-container *ngFor="let filter of filtersName">
+            <mat-checkbox formControlName ="{{filter}}" id="{{filter}}" (click)="$event.stopPropagation(); removeFilter(filter)">{{getFilterName(filter)}}</mat-checkbox>
+          </ng-container>
+        </div>
+      </mat-menu>
+    </div>
+    <div class="filters">
+      <div class="flex-1 filters-body" [formGroup]="filterNameFormGroup" *ngIf="filterArray">
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightEmp ? 'rgba(0,0,0,.12)':''}" *ngIf="displayEmp">
+          <span style="cursor: pointer;" (click)="sl.open()">Employee Status</span>
+          <mat-select #sl formControlName="empstatus" #empStatus multiple (spacekeydown)="spaceKeyDown($event)">
+            <mat-option #allEmpStatusSelected (click)="toggleAllSelection('empstatus')" [value]="'2'">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option [value]="'1'">Active</mat-option>
+            <mat-option [value]="'0'">Inactive</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnEmpStatus(); sl.close()">Apply</button>
+              <button mat-button style="float: right; background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightComp ? 'rgba(0,0,0,.12)':''}" *ngIf="displayCompany">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.CompanyID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="company" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'company')" autocomplete="off" placeholder=" search">
+            <mat-option #allCompanySelected (click)="toggleAllSelection('company')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let company of filterArray.company | customFilter:searchTextCompany:'CompanyName'" [value]="company" (click)="onOptionClick('company',company)">{{company.CompanyName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnCompany(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightBusinessunit ? 'rgba(0,0,0,.12)':''}" *ngIf="displayBusinessunit">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.BusinessUnitID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="businessunit" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'businessunit')" autocomplete="off" placeholder=" search">
+            <mat-option #allBusinessunitSelected (click)="toggleAllSelection('businessunit')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let businessunit of filterArray.businessunit | customFilter:searchTextBusinessunit:'BusinessUnitName'" [value]="businessunit" (click)="onOptionClick('businessunit', businessunit)">{{businessunit.BusinessUnitName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnBusinessunit(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightFunc ? 'rgba(0,0,0,.12)':''}" *ngIf="displayFunc">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.FuncID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="function" autofilled="true" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'function')" placeholder=" search">
+            <mat-option #allFuncSelected (click)="toggleAllSelection('function')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let function of filterArray.function | customFilter:searchTextFunc:'FuncName'" [value]="function" (click)="onOptionClick('function', function)">{{function.FuncName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnFunction(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightDepart ? 'rgba(0,0,0,.12)':''}" *ngIf="displayDepart">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.DeptID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="department" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'department')" autocomplete="off" placeholder=" search">
+            <mat-option #allDeptSelected (click)="toggleAllSelection('department')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let department of filterArray.department | customFilter:searchTextDepart:'DeptName'" [value]="department" (click)="onOptionClick('department', department)">
+              {{department.DeptName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnDepartment(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightSubdepart ? 'rgba(0,0,0,.12)':''}" *ngIf="displaySubdepart">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.SubDeptID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="subdepartment" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'subdepartment')" autocomplete="off" placeholder=" search">
+            <mat-option #allSubdeptSelected (click)="toggleAllSelection('subdepartment')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let subdepartment of filterArray.subdepartment | customFilter:searchTextSubdepart:'SubDeptName'" [value]="subdepartment" (click)="onOptionClick('subdepartment', subdepartment)">
+              {{subdepartment.SubDeptName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnSubdepartment(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightBranch ? 'rgba(0,0,0,.12)':''}" *ngIf="displayBranch">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.BranchID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="branch" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'branch')" autocomplete="off" placeholder=" search">
+            <mat-option #allBranchSelected (click)="toggleAllSelection('branch')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let branch of filterArray.branch | customFilter:searchTextBranch:'BranchName'" [value]="branch" (click)="onOptionClick('branch', branch)">{{branch.BranchName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnBranch(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightRole ? 'rgba(0,0,0,.12)':''}" *ngIf="displayRole">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.RoleID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="role" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'role')" autocomplete="off" placeholder=" search">
+            <mat-option #allRoleSelected (click)="toggleAllSelection('role')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let role of filterArray.role | customFilter:searchTextRole:'Role'" [value]="role" (click)="onOptionClick('role', role)">{{role.Role}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnRole(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightBand ? 'rgba(0,0,0,.12)':''}" *ngIf="displayBand">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.BandID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="band" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'band')" autocomplete="off" placeholder=" search">
+            <mat-option #allBandSelected (click)="toggleAllSelection('band')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let band of filterArray.band | customFilter:searchTextBand:'Band'" [value]="band" (click)="onOptionClick('band', band)">{{band.Band}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnBand(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightZone ? 'rgba(0,0,0,.12)':''}" *ngIf="displayZone">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.ZoneID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="zone" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'zone')" autocomplete="off" placeholder=" search">
+            <mat-option #allZoneSelected (click)="toggleAllSelection('zone')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let zone of filterArray.zone | customFilter:searchTextZone:'Zone'" [value]="zone" (click)="onOptionClick('zone', zone)">
+              {{zone.Zone}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnZone(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightLocation ? 'rgba(0,0,0,.12)':''}" *ngIf="displayLoc">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.LocID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="location"  multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'location')" autocomplete="off" placeholder=" search">
+            <mat-option #allLocSelected (click)="toggleAllSelection('location')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let location of filterArray.location | customFilter:searchTextLoc:'LocName'" [value]="location" (click)="onOptionClick('location', location)">{{location.LocName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnLocation(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightSublocation ? 'rgba(0,0,0,.12)':''}" *ngIf="displaySubloc">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.SubLocID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="sublocation"  multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'sublocation')" autocomplete="off" placeholder=" search">
+            <mat-option #allSublocSelected (click)="toggleAllSelection('sublocation')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let sublocation of filterArray.sublocation | customFilter:searchTextSubloc:'SubLocName'" [value]="sublocation" (click)="onOptionClick('sublocation', sublocation)">{{sublocation.SubLocName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnSublocation(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightManager ? 'rgba(0,0,0,.12)':''}" *ngIf="displayManager">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.Manager}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="manager" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'manager')" autocomplete="off" placeholder=" search">
+            <mat-option #allMgrSelected (click)="toggleAllSelection('manager')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let manager of managers | customFilter:searchTextManager:'Manager'" [value]="manager" (click)="onOptionClick('manager', manager)">{{manager.Manager}}
+            </mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnManager(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" *ngIf="displayHR" [ngStyle]="{'background': highlightHR ? 'rgba(0,0,0,.12)':''}">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.HRSpoc}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="hrspoc" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'hrspoc')" placeholder=" search">
+            <mat-option #allHrSelected (click)="toggleAllSelection('hrspoc')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let hrspoc of HRSPOCS | customFilter:searchTextHr:'HRSpoc'" [value]="hrspoc" (click)="onOptionClick('hrspoc', hrspoc)">{{hrspoc.HRSpoc}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnHRSpoc(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" [ngStyle]="{'background': highlightGender ? 'rgba(0,0,0,.12)':''}" *ngIf="displayGender">
+          <span style="cursor: pointer;" (click)="sl.open()">Gender</span>
+          <mat-select #sl formControlName="gender" #genderlist multiple (spacekeydown)="spaceKeyDown($event)">
+            <mat-option #allGenderSelected (click)="toggleAllSelection('gender')" [value]="'-1'">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option [value]="'male'">Male</mat-option>
+            <mat-option [value]="'female'">Female</mat-option>
+            <mat-option [value]="'transgender'">Transgender</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnGender(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div> 
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" *ngIf="displayInt" [ngStyle]="{'background': highlightInt ? 'rgba(0,0,0,.12)':''}">
+          <span style="cursor: pointer;" (click)="sl.open()">{{list.IntTypeID}}</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="inttype" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'inttype')" placeholder=" search">
+            <mat-option #allInttypeSelected (click)="toggleAllSelection('inttype')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let inttype of inttypes | customFilter:searchTextInt:'IntTypeName'" [value]="inttype" (click)="onOptionClick('inttype', inttype)">{{inttype.IntTypeName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnIntType(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+        </div>
+        <div class="filter-hover" style="padding: 5px 7px;" *ngIf="displayIntName" [ngStyle]="{'background': highlightIntName ? 'rgba(0,0,0,.12)':''}">
+          <span style="cursor: pointer;" (click)="sl.open()">Intervention Name</span>
+          <mat-select #sl panelClass="multi-dropdown" formControlName="intname" multiple (spacekeydown)="spaceKeyDown($event)">
+            <input class="search-box" type="text" (input)="changeInput($event,'intname')" placeholder=" search">
+            <mat-option #allIntnameSelected (click)="toggleAllSelection('intname')" [value]="0">All</mat-option>
+            <!-- <hr style="margin: 0;"> -->
+            <mat-option *ngFor="let intname of filterArray.intervention | customFilter:searchTextIntName:'IntName'" [value]="intname" (click)="onOptionClick('intname', intname)">{{intname.IntName}}</mat-option>
+            <div style="position: sticky;bottom: 0; background:white; padding: 0px 0 5px 0;">
+              <hr style="height:0.5px; border:none; color:rgb(203, 198, 198); background-color:rgb(203, 198, 198);">
+              <button mat-button color="primary" style="background: #72A230;color: #fff; line-height: 24px; padding: 0 11px;margin-left: 15px;" (click)="getFilterOnIntName(); sl.close()">Apply</button>
+              <button mat-button style="float: right;background: grey;color: #fff; line-height: 24px; padding: 0 11px; margin-right: 15px;" (click)="sl.close()">Cancel</button>
+            </div>
+          </mat-select>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="d-flex flex-2 flex-column" style="margin-left: 9px;margin-right: 10px;">
+  <mat-card class="p-0">
+    <div class="align-items-center chart-filters d-flex" style="margin: 10px 16px 10px 16px !important;display: inline-flex;">
+      <mat-icon class="mr-1">filter_list</mat-icon>
+      <mat-chip-list aria-orientation="horizontal" class="mr-1" >
+        <mat-chip (click)="changeFilter()">
+          {{displaySubCaption}}
+          <mat-icon>create</mat-icon>
+        </mat-chip>
+      </mat-chip-list>
+      <button *ngIf="type !== 'flight'" class="chart-button" mat-raised-button (click)="viewScoreChart()">{{chartButton}}</button>
+    </div>
+    <div style="display: inline-block;">
+      <p *ngIf="(highlightEmp || highlightGender || highlightComp ||highlightFunc || highlightDepart || highlightSubdepart || highlightRole || highlightLocation || highlightSublocation || highlightBand || highlightBusinessunit || highlightBranch || highlightManager || highlightHR || highlightInt || highlightIntName || highlightZone)" style="margin: 2px 0 0 20px; font-size: small;color: black;"><b>You can remove filters here:</b></p>
+      <div style="margin: 2px 0 0 16px;">
+        <div *ngIf="highlightEmp" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              Employee status
+              <mat-icon matChipRemove (click)="removeTableParam('empstatus')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightGender" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              Gender
+              <mat-icon matChipRemove (click)="removeTableParam('gender')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightFunc" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.FuncID}}
+              <mat-icon matChipRemove (click)="removeTableParam('function')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightComp" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.CompanyID}}
+              <mat-icon matChipRemove (click)="removeTableParam('company')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightDepart" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.DeptID}}
+              <mat-icon matChipRemove (click)="removeTableParam('department')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightSubdepart" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.SubDeptID}}
+              <mat-icon matChipRemove (click)="removeTableParam('subdepartment')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightRole" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.RoleID}}
+              <mat-icon matChipRemove (click)="removeTableParam('role')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightZone" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.ZoneID}}
+                <mat-icon matChipRemove (click)="removeTableParam('zone')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightLocation" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.LocID}}
+              <mat-icon matChipRemove (click)="removeTableParam('location')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightSublocation" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.SubLocID}}
+              <mat-icon matChipRemove (click)="removeTableParam('sublocation')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightBand" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.BandID}}
+                <mat-icon matChipRemove (click)="removeTableParam('band')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightBusinessunit" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.BusinessUnitID}}
+                <mat-icon matChipRemove (click)="removeTableParam('businessunit')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightBranch" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.BranchID}}
+                <mat-icon matChipRemove (click)="removeTableParam('branch')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightManager" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.Manager}}
+                <mat-icon matChipRemove (click)="removeTableParam('manager')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightHR" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.HRSpoc}}
+                <mat-icon matChipRemove (click)="removeTableParam('hrspoc')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightInt" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+              {{list.IntTypeID}}
+                <mat-icon matChipRemove (click)="removeTableParam('inttype')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+        <div *ngIf="highlightIntName" style="display: inline-block;">
+          <mat-chip-list  >
+            <mat-chip removable="true">
+                Intervention Name
+                <mat-icon matChipRemove (click)="removeTableParam('intname')">cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</div>
+
+<div class="d-flex multi-cart-main mt-1">
+  <div class="flex-1 mr-10" style="height: 450px;background: white;">
+    <mat-card id="targetGraph" class="stackedBar2d">
+      <div class="loading-shade" *ngIf="isLoadingResultsStackedBar">
+        <!-- <mat-spinner *ngIf="isLoadingResultsStackedBar"></mat-spinner> -->
+        <ng-container *ngIf="isLoadingResultsStackedBar">
+          Loading...
+        </ng-container>
+      </div>
+      <div class="loading-shade" *ngIf="!isLoadingResultsStackedBar && !isStageChartData" style="top:30px;left: 45px;">
+        <ng-container>
+          No Data Available
+        </ng-container>
+      </div>
+      <div *ngIf="type == 'hr'" style="padding: 8px 5px 0px 8px;height: 35px;">
+        <ng-container >
+          <select [(ngModel)]='tenureChartType' (change)="viewTenureGraphBy($event.target.value)">
+            <option value='tenure'>View by Stages</option>
+            <option value='factor'>View by Factors</option>
+          </select>
+        </ng-container>
+        <div style="display: inline-block;margin-left: 50px;">
+          <span *ngIf="!toggle" style="font-size: 14px;"><strong>{{tenureCaption}}</strong></span>
+          <span *ngIf="toggle" style="font-size: 14px;"><strong>{{tenureScoreCaption}}</strong></span>
+        </div>
+        <div style="margin-left: 39%;margin-top: -8px;">
+          <span style="font-size: 10px;">{{tenureSubCaption}}</span>
+        </div>
+      </div>
+      <div *ngIf="type != 'hr'" style="padding: 8px 5px 0px 8px;height: 35px;">
+        <div style="text-align: center;">
+          <span *ngIf="!toggle" style="font-size: 14px;"><strong>{{tenureCaption}}</strong></span>
+          <span *ngIf="toggle" style="font-size: 14px;"><strong>{{tenureScoreCaption}}</strong></span>
+        </div>
+        <div style="text-align: center;margin-top: -8px;">
+          <span style="font-size: 10px;">{{tenureSubCaption}}</span>
+        </div>
+      </div>  
+      <div style="height: 375px;">
+      <app-stackedbar2d *ngIf="!toggle" [stackedBar2d]="stackedBar2d"></app-stackedbar2d>
+      <app-stackedbar2d *ngIf="toggle" [stackedBar2d]="stackedBar2dScore"></app-stackedbar2d>
+      </div>
+      <div *ngIf="!isLoadingResults" >
+        <img *ngIf="type == 'hr' && !toggle" src="assets/icons/charts/engagement_distribution_legend.JPG">
+        <img *ngIf="type == 'hr' && toggle" src="assets/icons/charts/engagement_score_legend.JPG">
+        <img *ngIf="type == 'enps' && !toggle" src="assets/icons/charts/enps_distribution_legend.JPG">
+        <img *ngIf="type == 'enps' && toggle" src="assets/icons/charts/enps_score_legend.JPG">
+        <img *ngIf="type == 'happiness' && !toggle" src="assets/icons/charts/happiness_distribution_legend.JPG">
+        <img *ngIf="type == 'happiness' && toggle" src="assets/icons/charts/happiness_score_legend.JPG">
+        <img *ngIf="type == 'flight' && !toggle" src="assets/icons/charts/flight_distribution_legend.JPG">
+      </div>
+    </mat-card>
+  </div>
+  <div class="d-flex flex-2 flex-column combo-chart-parent">
+    <mat-card class="mb-10 p-0">
+      <div class="align-items-center chart-filters d-flex m-1">
+        <mat-radio-group class="mr-1" [(ngModel)]="graphType">
+          <ng-container *ngFor="let graph of graphs">
+            <mat-radio-button class="mr-1" *ngIf="graph.type !== 'pie'" [value]="graph.type">
+              {{graph.name}}
+            </mat-radio-button>
+            <mat-radio-button class="mr-1" *ngIf="(graph.type === 'pie' && type !== 'flight') && !toggle" [value]="graph.type">
+              {{graph.name}}
+            </mat-radio-button>
+          </ng-container>
+        </mat-radio-group>
+      </div>
+    </mat-card>
+    <mat-card class="comboChart">
+      <div class="loading-shade" *ngIf="isLoadingResults">
+        <!-- <mat-spinner *ngIf="isLoadingResults"></mat-spinner> -->
+        <ng-container *ngIf="isLoadingResults">
+          Loading...
+        </ng-container>
+      </div>
+      <div class="loading-shade" *ngIf="!isLoadingResults && !isChartData">
+        <ng-container>
+          No Data Available
+        </ng-container>
+      </div>
+      <app-pie2d *ngIf="graphType === 'pie' && type !== 'flight'" [pie2d]="pie2d"
+      (dataPlotClickEvent)="pieChartDataPlotClick($event)"></app-pie2d>
+      <app-multi-series-column-chart2d *ngIf="graphType === 'bar' && type ==='flight'" [msColumn2d]="msColumn2d">
+      </app-multi-series-column-chart2d>
+      
+      <app-stacked-column2d *ngIf="(graphType === 'bar' && type !=='flight') && !toggle" [stackedColumn2d]="stackedColumn2d"
+        (dataPlotClickEvent)="dataPlotClick($event)"></app-stacked-column2d>
+      <app-stacked-column2d *ngIf="(graphType === 'bar' && type !=='flight') && toggle" [stackedColumn2d]="stackedColumn2dScore"
+      (dataPlotClickEvent)="dataPlotClick($event)"></app-stacked-column2d> 
+
+      <app-line-chart *ngIf="graphType === 'line' && !toggle" [msline]="msline" (dataPlotClickEvent)="dataPlotClick($event)">
+      </app-line-chart>
+      <app-line-chart *ngIf="graphType === 'line' && toggle" [msline]="mslineScore" (dataPlotClickEvent)="dataPlotClick($event)">
+      </app-line-chart> 
+
+      <app-combo-chart *ngIf="graphType === 'combo' && !toggle" [comboChart]="comboChart"
+        (dataPlotClickEvent)="dataPlotClick($event)"></app-combo-chart>
+      <app-combo-chart *ngIf="graphType === 'combo' && toggle" [comboChart]="comboChartScore"
+      (dataPlotClickEvent)="dataPlotClick($event)"></app-combo-chart>
+    </mat-card>
+  </div>
+</div>

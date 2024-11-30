@@ -1,0 +1,170 @@
+<!-- <div class="main">
+    <mat-card class="mb-10">
+        <form [formGroup]="filterForm" class="filter-form" *ngIf="showForm && !showTable">
+            <div class="loading-shade" *ngIf="isLoadingResults">
+                <mat-spinner *ngIf="isLoadingResults"></mat-spinner>
+            </div>
+            <div class="report-mat-select filter-full-width">
+                <lib-dash-input-search [customLabelText]="'Search By Name/EmpID'" [tags]="tags"  ></lib-dash-input-search>
+            </div>
+
+            <div class="filter-full-width d-flex flex-column">
+                <lib-forms-dash-reports-select [customLabelText]="'Report Type'" [multiType]="true"></lib-forms-dash-reports-select>
+            </div>
+
+            <div class="filter-full-width d-flex flex-column" >
+                <lib-forms-dash-reports-select [customLabelText]="'Status'" [multiType]=""></lib-forms-dash-reports-select>
+            </div>
+
+            <div class="period">
+                <strong>Period</strong>
+            </div>
+
+            <div class="report-mat-select filter-full-width">
+                <lib-forms-dash-reports-input-datepicker [customLabelText]="'From'"></lib-forms-dash-reports-input-datepicker>
+            </div>
+
+            <div class="report-mat-select filter-full-width">
+                <lib-forms-dash-reports-input-datepicker [customLabelText]="'To'"></lib-forms-dash-reports-input-datepicker>
+            </div>
+
+        </form>
+        <div class="filter-footer-table" >
+            <button mat-raised-button color="primary">Export</button>
+          </div>
+    </mat-card>
+</div> -->
+
+
+<div class="main">
+    <mat-card class="mb-10">
+      <form [formGroup]="filterForm" class="filter-form" *ngIf="showForm && !showTable">
+        <div class="loading-shade" *ngIf="isLoadingResults">
+          <mat-spinner *ngIf="isLoadingResults"></mat-spinner>
+        </div>
+        <mat-form-field class="report-mat-select filter-full-width">
+          <mat-chip-list #chipList aria-label="Search By Name/EmpID">
+            <mat-chip class="tag" style="background-color:#fff; border: 1px solid lightgray; min-height: 23px; color: gray; font-weight: bold; font-size: 12px;" *ngFor="let tag of tags" [selectable]="selectable"
+                     [removable]="removable" (removed)="removeTag(tag)">
+              {{tag}}
+              <mat-icon matChipRemove *ngIf="removable"><img class="remove" src="assets/icons/close-icon.svg"/></mat-icon>
+            </mat-chip>
+            <input placeholder="Search By Name/EmpID"
+                   matInput [formControl]="empCode"
+                   [matChipInputFor]="chipList"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur"
+                   (matChipInputTokenEnd)="addTag($event)">
+          </mat-chip-list>
+          <mat-hint style="white-space: nowrap;">
+            Insert "," or press "Enter" to search multiple Employee Names/EmpIDs
+          </mat-hint>
+        </mat-form-field>
+
+        <div class="filter-full-width d-flex flex-column select-class">
+            <label>Report Type</label>
+            <ng-select [ngModel]="selectedReport[0]?.id" (change)="onReportTypeSelect($event)" formControlName="reportType">
+                <ng-option *ngFor="let report of reportType" [value]="report.id" >{{report.name}}</ng-option>
+            </ng-select>
+          <!-- <label>Report Type</label>
+          <angular2-multiselect [data]="reportType" (onSelect)="onReportTypeSelect($event)" [(ngModel)]="selectedReport" [settings]="reportTypeDropDownSettings"
+            formControlName="reportType">
+          </angular2-multiselect> -->
+        </div>
+        <div class="filter-full-width d-flex flex-column select-class" *ngIf="status.length > 0">
+            <label>Status</label>
+            <ng-select [items]="status" [(ngModel)]="selectedStatusIDs" formControlName="status" [multiple]="true" bindLabel="StatusName" 
+            bindValue="StatusValue">
+                <ng-option *ngFor="let stat of status" [value]="stat.StatusValue">{{stat.StatusName}}</ng-option>
+            </ng-select>
+          <!-- <label>Status</label>
+          <angular2-multiselect [data]="status" [(ngModel)]="selectedStatus" [settings]="statusDropDownSettings"
+            formControlName="status">
+          </angular2-multiselect> -->
+        </div>
+        <div class="period">
+          <strong>Period</strong>
+        </div>
+        <mat-form-field class="report-mat-select filter-full-width">
+          <input matInput [matDatepicker]="pickerFrom" [max]="getMaxDateForFrom()" placeholder="From" formControlName="from"
+            (dateChange)="fromDateValueChange($event.value)" required>
+          <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+          <mat-error *ngIf="this.filterForm.controls['from'].errors?.required">Period is required</mat-error>
+        </mat-form-field>
+        <mat-form-field class="report-mat-select filter-full-width">
+          <input matInput [matDatepicker]="pickerTo" [min]="getMinDateForTo()" [max]="getTodayDate()" placeholder="To"
+            formControlName="to" (dateChange)="toDateValueChange($event.value)" required>
+          <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+          <mat-error *ngIf="this.filterForm.controls['to'].errors?.required"></mat-error>
+        </mat-form-field>
+      </form>
+
+      <div *ngIf="showForm && !showTable" class="filter-footer">
+        <strong *ngIf="waitingMessage" class="waitingmsg">{{waitingMsg}}</strong>
+        <strong *ngIf="endingMessage" class="waitingmsg">{{endingMsg}}</strong>
+        <button mat-raised-button style="float: right" [class.mr-1]="showForm" (click)="submit('export')" [disabled]="this.filterForm.invalid"
+          color="primary">Export</button>
+
+      </div>
+      <div class="filter-footer-table" *ngIf="showTable && period">
+        <strong *ngIf="waitingMessage" class="waitingmsg1">{{waitingMsg}}</strong>
+        <strong *ngIf="endingMessage" class="waitingmsg1">{{endingMsg}}</strong>
+        <button mat-raised-button class="background-grey mr-1" color="primary" (click)="reset()">Hide</button>
+        <button mat-raised-button (click)="submit('export')" [class.mr-1]="showForm" color="primary">Export</button>
+      </div>
+
+      <mat-paginator class="reports-page" [length]="totalNoOfRecords" [pageSize]="20" [pageSizeOptions]="[20, 40, 60, 80]" (page)="changePage($event)"
+        *ngIf="showTable">
+      </mat-paginator>
+      <ng-container *ngIf="period && showTable">
+        <button mat-raised-button color="primary" (click)="navigateROICalculator()"  ><mat-icon style="color:white;">arrow_back</mat-icon> ROI Calculator </button>
+      </ng-container>
+      <mat-table [dataSource]="dataSource" class="example-table" matSort (matSortChange)="sortData($event)" matSortActive="created"
+        matSortDisableClear matSortDirection="asc" *ngIf="showTable">
+
+        <ng-container matColumnDef="Employee">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>Employee</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Employee}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="Function">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>{{list.FuncID}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Function}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="Company">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>{{list.CompanyID}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Company}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="Role">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>{{list.RoleID}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Role}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="Location">
+        <mat-header-cell mat-sort-header *matHeaderCellDef>{{list.LocID}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Location}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="Manager">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>{{list.Manager}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Manager}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="HRSpoc">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>{{list.HRSpoc}}</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.HRSpoc}}</mat-cell>
+        </ng-container>
+  
+        <ng-container matColumnDef="Status">
+          <mat-header-cell mat-sort-header *matHeaderCellDef>Status</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{row.Status}}</mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="displayedColumns;"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </mat-card>
+  </div>

@@ -1,0 +1,3 @@
+[submodule "umwelt-library"]
+	path = umwelt-library
+	url = git@github.com:Umwelt-Peopletech-Solutions-Inc/umwelt-library.git

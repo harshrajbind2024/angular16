@@ -1,0 +1,153 @@
+<div class="d-flex w-100">
+    <div class="insightsCard">
+        <div class="title">
+            Engagement Score
+        </div>
+        
+        <div class="score">
+            {{insightsData.period1_engagment_score}}
+        </div>
+        <div class="text">
+            {{insightsData.difference_engagement_score}}
+        </div>
+    </div>
+    <div class="responseCard d-flex w-100 justify-content-center">
+        <div class="d-flex w-100" style="justify-content: space-around;">
+            <div class="innercard">
+                <div class="title">
+                    Response Rate
+                </div>
+                <div class="score" *ngIf="insightsData.period_1_response_rate !== '-'">
+                    {{insightsData.period_1_response_rate}} %
+                </div>
+                <div class="score" *ngIf='insightsData.period_1_response_rate === "-"'>
+                    {{insightsData.period_1_response_rate}}
+                </div>
+                <div class="text">
+                    <span style="color: #7f7f7f;">{{insightsData.responded}}</span> of <span style="color: #7f7f7f;">{{insightsData.total_responses}}</span> Responded
+                </div>
+                <div class="subtext"  *ngIf="insightsData.difference_response_rate !== '-'">
+                    <span [ngStyle]="{'color':(insightsData.difference_response_rate>0)?'green':'red'}">{{+insightsData.difference_response_rate}}%</span>
+                    <span *ngIf="insightsData.difference_response_rate>0">
+                        above
+                    </span>
+                    <span *ngIf="!(insightsData.difference_response_rate>0)">
+                        below
+                    </span>
+                    previous period
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="divider">
+                </div>
+            </div>
+            <div class="innercard">
+                <div class="title">
+                    Engagement Level
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div class="d-flex colorMeterContainer mt-1">
+                        <div style="min-width: max-content;padding-left: 5px;padding-right: 5px;">
+                            <div class="p">{{cap1}}</div>
+                            <div class="p">{{cap2}}</div>
+                        </div>
+                        <div style="padding-right: 5px;">
+                            <div class="colorMeter d-flex" >
+                                
+                                <div class="green" [style.width]="(insightsData.eng_percentage/10)+'vw'" [matTooltip]="insightsData.eng_rate_num_tooltip" matTooltipPosition="above">
+                                </div>
+                                <div class="yellow" [style.width]="(insightsData.diseng_percentage/10)+'vw'" [matTooltip]="insightsData.noteng_rate_num_tooltip" matTooltipPosition="above">
+                                </div>
+                                <div class="red" [style.width]="(insightsData.actively_dise_percentage/10)+'vw'" [matTooltip]="insightsData.acteng_rate_num_tooltip" matTooltipPosition="above">
+                                </div>
+                            </div>
+                            <div class="colorMeter d-flex" >
+                                <div class="green" [style.width]="(insightsData.eng_percentage2/10)+'vw'" [matTooltip]="insightsData.eng_rate_num_tooltip2" matTooltipPosition="above">
+                                </div>
+                                <div class="yellow" [style.width]="(insightsData.diseng_percentage2/10)+'vw'" [matTooltip]="insightsData.noteng_rate_num_tooltip2" matTooltipPosition="above">
+                                </div>
+                                <div class="red" [style.width]="(insightsData.actively_dise_percentage2/10)+'vw'" [matTooltip]="insightsData.acteng_rate_num_tooltip2" matTooltipPosition="above">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex w-100 mt-3 px-1" style="justify-content: space-around;">
+                    <div class="colorBoxContainer d-flex align-items-center" *ngIf="insightsData.difference_eng_percentage !== '-'">
+                        <div class="colorBox green">
+                        </div>
+                        <mat-icon *ngIf="insightsData.difference_eng_percentage!=0">
+                            {{
+                                (insightsData.difference_eng_percentage<0)
+                                ?'arrow_downward'
+                                :'arrow_upward'
+                            }}
+                        </mat-icon>
+                        <div style="margin-left: 5px;">
+                            {{
+                                (insightsData.difference_eng_percentage<0)
+                                ?-insightsData.difference_eng_percentage
+                                :insightsData.difference_eng_percentage
+                            }} %
+                        </div>
+                    </div>
+
+                    <div class="colorBoxContainer d-flex align-items-center" *ngIf="insightsData.difference_diseng_percentage!=='-'">
+                        <div class="colorBox yellow">
+                        </div>
+                        <mat-icon *ngIf="insightsData.difference_diseng_percentage!=0">
+                            {{
+                                (insightsData.difference_diseng_percentage<0)
+                                ?'arrow_downward'
+                                :'arrow_upward'
+                            }}
+                        </mat-icon>
+                        <div style="margin-left: 5px;">
+                            {{
+                                (insightsData.difference_diseng_percentage<0)
+                                ?-insightsData.difference_diseng_percentage
+                                :insightsData.difference_diseng_percentage
+                            }} %
+                        </div>
+                    </div>
+
+                    <div class="colorBoxContainer d-flex align-items-center" *ngIf="insightsData.difference_actively_dise_percentage!=='-'">
+                        <div class="colorBox red">
+                        </div>
+                        <mat-icon *ngIf="insightsData.difference_actively_dise_percentage!=0">
+                            {{
+                                (insightsData.difference_actively_dise_percentage<0)
+                                ?'arrow_downward'
+                                :'arrow_upward'
+                            }}
+                        </mat-icon>
+                        <div style="margin-left: 5px;">
+                            {{
+                                (insightsData.difference_actively_dise_percentage<0)
+                                ?-insightsData.difference_actively_dise_percentage
+                                :insightsData.difference_actively_dise_percentage
+                            }} %
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="divider">
+                </div>
+            </div>
+            <div class="innercard">
+                <div class="title">
+                    Comments
+                </div>
+                <div class="score">
+                    {{insightsData.comments}}
+                </div>
+                <div mat-button class="text" style="cursor: pointer;color: #5097da;"
+                    (click)="navigateToSentiment()">
+                    View Text Comments
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

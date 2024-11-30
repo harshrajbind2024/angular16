@@ -1,0 +1,153 @@
+:host {
+  z-index: 4;
+}
+
+.main-toolbar {
+  // height: 64px;
+  padding-left: 16px;
+  color: #FFF;
+}
+
+.more-btn {
+  height: 100%;
+  min-width: 70px;
+}
+
+.mat-icon-button {
+  margin-right: 10px;
+  color: #FFF;
+}
+
+.toolbar{
+    background-color: #32adda;
+    color: #FFF;
+    mat-icon {
+        color: #FFF;
+    }
+}
+
+.panel{
+  font-size: 1rem;
+  width: 19rem;
+  margin-right: 10px;
+  &.active {
+    background:rgba(0,0,0,.12)
+  }
+}
+
+@media screen and (min-width: 1100px){
+  .updatedTime{
+    width: 100%; 
+    text-align: center; 
+    margin-left: -12%;
+  }
+}
+@media screen and (min-width: 932px) and (max-width:1100px){
+  .updatedTime{
+    width: 100%; 
+    text-align: center; 
+  }
+}
+
+::ng-deep .customize{
+  background: #32adda;
+  color: #FFF;
+  // margin: 4px 0 0 7%;
+  width: 190px;
+  // position: fixed;
+}
+
+.toolbarII{
+  background-color: #00000000;
+  color: #FFF;
+    mat-icon {
+        color: #FFF;
+  }
+}
+
+.topnav{
+  overflow: hidden;
+  margin-left: 50px;
+}
+
+.topnav a {
+  float: left;
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 0px 10px 0px 10px;
+  text-decoration: none;
+  font-size: 1rem;
+  border-bottom: 3px solid transparent;
+  margin-right: 25px;
+  margin-bottom: 6px;
+}
+
+.topnav a:hover {
+  border-bottom: 3px solid #32adda;
+}
+
+.topnav a.active {
+  border-bottom: 3px solid #32adda;
+  color: #32adda;
+}
+
+.icon-button{
+  background: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.icon-button .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-button .icon-roi {
+  width: 30px;
+  height: 30px;
+}
+.main{
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.ou-filter-toolbar{
+  background: unset;
+  padding: 0px;
+  font:unset;
+}
+
+$prefix: 'toolbar-notification';
+.badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  font-weight: 700;
+  line-height: 13px;
+  height: 13px;
+  padding: 5px;
+  border-radius: 26%;
+  width: 30%;
+  background-color: #f44336;
+  color: #fff;
+  border-color:#f44336
+}
+.#{$prefix} {
+  &-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    mat-icon{
+        color:#FFF;
+    }
+  }
+
+  &-btn {
+    display: flex;
+    justify-content: center;
+    margin-right: 10px;
+  }
+}

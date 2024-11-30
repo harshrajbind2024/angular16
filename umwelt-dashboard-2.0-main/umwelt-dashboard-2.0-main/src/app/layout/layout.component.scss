@@ -1,0 +1,40 @@
+@mixin auth($theme) {
+    $primary: map-get($theme, primary);
+    $accent: map-get($theme, accent);
+    $warn: map-get($theme, warn);
+
+    
+    .sidenav,.drawer{
+        background: mat-color($primary,400);    
+        overflow: hidden;
+        position: relative;
+    }
+    [no-over-flow] {
+        overflow: hidden;
+    }
+    .router-outlet{
+        position: relative;padding: 0px 5px;
+    }
+    .spacer {
+        width: 100%;
+    }
+}
+
+.height-1 {
+    height: calc(100% - 54px);
+}
+.height-2 {
+    height: calc(100% - 110px)
+}
+.height-3 {
+    height: calc(100% - 135px)
+}
+
+::ng-deep .ng-scroll-content {
+    max-width: 100%;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+}
+.container {
+    max-width: 100% !important;
+}

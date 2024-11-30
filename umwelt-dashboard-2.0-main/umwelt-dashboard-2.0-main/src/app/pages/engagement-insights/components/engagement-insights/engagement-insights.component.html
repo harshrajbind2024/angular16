@@ -1,0 +1,11 @@
+<div class="main" style="position: relative;">
+    <app-engagement-scores [insightsData]="insightsData" [cap1]="cap1" [cap2]="cap2"></app-engagement-scores>
+    <div  style="color: black;font-weight: bold;padding: 20px 30px;">
+      Engagement Heat Map, 
+      <span style="color: #7f7f7f;">
+        Group by Segments and apply Highlight Cells, Top / Bottom Rules to view detailed Heat Map showing performance of Engagement Factors / Drivers / Questions for choosen Segment
+        <!-- Choose segment to view detailed Heat Map showing performance of each Engagement Factor for choosen Segment  -->
+      </span>
+    </div>
+    <app-engagement-heatmap [cap1]="cap1" [cap2]="cap2"></app-engagement-heatmap>
+</div>

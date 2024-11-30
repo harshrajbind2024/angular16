@@ -1,0 +1,10 @@
+<ng-container *ngIf="showGraph && dataCreated">
+    <fusioncharts
+        [width]="width"
+        [height]="height"
+        [type]="type"
+        [dataFormat]="dataFormat"
+        [dataSource]="dataSource"
+        [id]="id">
+    </fusioncharts>
+</ng-container>

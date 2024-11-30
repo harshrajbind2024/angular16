@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: prod
+  name: dashboard-frontend-prod-deployment
+  labels:
+    app: dashboard-frontend-prod
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: dashboard-frontend-prod
+  template:
+    metadata:
+      labels:
+        app: dashboard-frontend-prod
+    spec:
+      hostname: dashboard-frontend-prod
+      containers:
+        - name: dashboard-frontend-prod
+          image: 294339195387.dkr.ecr.<region>.amazonaws.com/uw-dashboard-frontend-prod:<VERSION>
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: '1024Mi'
+              cpu: '250m'
+            limits:
+              memory: '1024Mi'
+              cpu: '250m'
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+      nodeSelector:
+        noderole: app          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: prod
+  name: dashboard-frontend-prod-svc
+  labels:
+    svc: dashboard-frontend-prod
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: dashboard-frontend-prod

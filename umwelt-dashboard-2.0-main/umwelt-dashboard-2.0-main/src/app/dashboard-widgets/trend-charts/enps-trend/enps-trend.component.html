@@ -1,0 +1,49 @@
+<ng-container *ngIf="showGraph">
+	<div fxLayout="row" fxLayoutWrap>
+		<div fxFlex="100" fxFlex.lt-sm="100" fxFlex.sm="50" class="center">
+			<app-speedo-meter [showGraph]="showGraph" [value]="speedoMeterValue" [message]="speedoMeterMessage" [range]="speedoMeterRange"></app-speedo-meter>
+		</div>
+	</div>
+	<hr>
+	<div fxLayout="row" fxLayoutWrap>
+		<div fxFlex="50" fxFlex.lt-sm="50" fxFlex.sm="50">
+			<div fxLayout="row" fxLayoutWrap>
+				<div fxFlex="50" fxFlex.lt-sm="50" fxFlex.sm="50" class="center">
+					<h2 style="margin-top: 0px">{{ trend.previous_quarter }}</h2>
+					<p style="margin-top: 2px">Quarter</p>
+				</div>
+				<div fxFlex="50" fxFlex.lt-sm="50" fxFlex.sm="50" class="center">
+					<h2 style="margin-top: 0px">{{ trend.previous_month }}</h2>
+					<p style="margin-top: 3px">Monthly</p>
+				</div>
+			</div>
+			<p class="center uppercase">Previous</p>
+		</div>
+		<div fxFlex="50" fxFlex.lt-sm="50" fxFlex.sm="50">
+			<div fxLayout="row" fxLayoutWrap>
+				<div fxFlex="50" fxFlex.lt-sm="50" fxFlex.sm="50" class="center">
+					<h2>
+						<span>{{ trend.current_quarter }}</span>
+						<mat-icon *ngIf="current_quarter_arrow && trend.previous_quarter !== '-' && trend.current_quarter !== '-'" class="icon" [ngStyle]="{'color':current_quarter_arrow === 'arrow_upward' ? 'green' : 'red' }">{{
+							current_quarter_arrow }}</mat-icon>
+					</h2>
+					<p>Quarter</p>
+				</div>
+				<div fxFlex="50" fxFlex.lt-sm="50" fxFlex.sm="50" class="center">
+					<h2>
+						{{ trend.current_month }}
+						<mat-icon *ngIf="current_month_arrow && trend.previous_month !== '-' && trend.current_month !== '-'" class="icon" [ngStyle]="{'color':current_month_arrow === 'arrow_upward' ? 'green' : 'red' }">{{
+							current_month_arrow }}</mat-icon>
+					</h2>
+					<p>Monthly</p>
+				</div>
+			</div>
+			<p class="center uppercase">Current</p>
+		</div>
+	</div>
+</ng-container>
+<ng-container *ngIf="!showGraph">
+	<div class="loading-text">
+		Loading...
+	</div>
+</ng-container>

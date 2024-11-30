@@ -1,0 +1,162 @@
+pipeline {
+	agent any
+	options {
+        skipStagesAfterUnstable()
+		timeout(time: 30, unit: 'MINUTES')
+    	}
+	environment { 
+	    ENVIRONMENT=''
+    	SECRET_ARN=''
+		SSH_PRIVATE_KEY = credentials('new-jenkins-git')  // Jenkins secret ID	
+    }
+	stages {
+		stage('PRE_CHECK') {
+			when{
+				expression { env.BRANCH_NAME in ['stg'] }
+			}
+			steps {
+				echo "Step: Deployment, initiated..."
+				script {
+					committerEmail = sh (
+      				script: 'git log -1 --pretty=format:"%an"', returnStdout: true
+					).trim()
+				}
+				echo "Committer Email : '${committerEmail}'"
+				echo "Removing node_modules and previous build files"
+				sh "rm -rf node_modules build"
+			}
+		}
+		stage('stg') {
+    when {
+        expression { env.BRANCH_NAME in ['staging-2.0', 'main'] }
+    }
+    steps {
+        script {
+            ENVIRONMENT='stg'
+        }
+    }
+}
+
+stage('STG_DEPLOY') {
+    when {
+        expression { env.BRANCH_NAME in ['staging-2.0', 'main'] }
+    }
+    steps {
+        echo "Deploying to $ENVIRONMENT environment for $GIT_BRANCH branch. Build number #${BUILD_NUMBER}"
+        sh """
+        cd $WORKSPACE
+        chmod +x deploy.sh
+        ./deploy.sh $ENVIRONMENT
+        """
+    }
+}
+
+        stage('Determine AWS Region') {
+            when {
+                branch 'release-2.0'
+            }
+            steps {
+                script {
+                    // Get the region from the AWS metadata
+                    def awsRegion = sh(
+                        script: "aws configure get region",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Jenkins server is in AWS region: ${awsRegion}"
+
+                    // Set the environment based on the region
+                    if (awsRegion == 'ap-south-1') {
+                        ENVIRONMENT = 'prod'
+                    } else if (awsRegion == 'ap-southeast-1') {
+                        ENVIRONMENT = 'prod-dr'
+                    } else {
+                        error("Unsupported AWS region: ${awsRegion}")
+                    }
+
+                    echo "Setting deployment environment to: ${ENVIRONMENT}"
+                }
+            }
+        }
+        
+		stage('PROD_DEPLOY') {
+			when{
+				expression { env.BRANCH_NAME in ['release-2.0']  }
+			}
+        	steps {
+          		echo "Deploying to $ENVIRONMENT environment for $GIT_BRANCH branch. Build number #${BUILD_NUMBER}"
+          		sh """
+            	cd $WORKSPACE
+            	chmod +x deploy.sh
+            	./deploy.sh $ENVIRONMENT
+          		"""
+			}
+      	}
+		stage('POST_CHECKS') {
+			when{
+				expression { env.BRANCH_NAME in ['staging-2.0', 'release-2.0', 'main'] }
+			}
+			steps {
+				echo "POST test"
+			}	
+			post {
+				always {
+					echo "ALWAYS test1"
+				}
+				success {
+					echo "ALWAYS success"
+				}
+				failure {
+					echo "ALWAYS failure"
+				}
+			}
+		}		
+    } // stages
+	post {
+        always {
+            echo "ALWAYS last-post check"
+            emailext (
+                subject: "Jenkins Build ${currentBuild.fullDisplayName}",
+                body: """
+                <p>Build Information:</p>
+                <ul>
+                    <li>Build URL: ${env.BUILD_URL}</li>
+                    <li>Build Number: ${env.BUILD_NUMBER}</li>
+                    <li>Build Status: ${currentBuild.currentResult}</li>
+                </ul>
+                """,
+                to: 'dev@umwelt.ai'
+            )
+        }
+        aborted {
+            echo "post success"
+            emailext (
+                subject: "Jenkins Build ${currentBuild.fullDisplayName} - Aborted",
+                body: """
+                <p>Build Information:</p>
+                <ul>
+                    <li>Build URL: ${env.BUILD_URL}</li>
+                    <li>Build Number: ${env.BUILD_NUMBER}</li>
+                    <li>Build Status: ${currentBuild.currentResult}</li>
+                </ul>
+                """,
+                to: 'dev@umwelt.ai'
+            )
+        }
+        failure {
+            echo "post failure"
+            emailext (
+                subject: "Jenkins Build ${currentBuild.fullDisplayName} - Failed",
+                body: """
+                <p>Build Information:</p>
+                <ul>
+                    <li>Build URL: ${env.BUILD_URL}</li>
+                    <li>Build Number: ${env.BUILD_NUMBER}</li>
+                    <li>Build Status: ${currentBuild.currentResult}</li>
+                </ul>
+                """,
+                to: 'dev@umwelt.ai'
+            )
+        }
+    }
+}

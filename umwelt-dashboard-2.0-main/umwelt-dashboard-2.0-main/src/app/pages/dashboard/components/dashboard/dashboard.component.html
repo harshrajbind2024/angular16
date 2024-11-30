@@ -1,0 +1,42 @@
+<div fxLayout="row" fxLayoutWrap class="widget-carousel">
+    <div class="column" fxFlex="100" fxFlex.lt-sm="100" fxFlex.sm="50">
+        <ngu-carousel [inputs]="carouselConfig" [dataSource]="carouselItems">
+            <ngu-tile *nguCarouselDef="let item;">
+                <div fxFlex="100" fxFlex.lt-sm="100" fxFlex.sm="50">
+                    <div class="{{item.id}}-trend mat-elevation-z4">
+                        <div class="weatherimage" title="Click to update the chart and table for {{item.title}}" style="display: flex; flex-direction: column; align-items: center; padding-bottom: 1px;">
+                            <button mat-button [class]="item.buttonClass" (click)="onClickingTrend(item.id)" [style.background]="isActive(item.id) ?'#32ADDA':''" [style.color]="isActive(item.id) ?'white':''" ><strong>{{item.title}}</strong></button>
+                        </div>
+                        <ng-container *ngIf="item.id == 'hr'">
+                            <app-hr-trend></app-hr-trend>
+                        </ng-container>
+                        <ng-container *ngIf="item.id == 'enps'">
+                            <app-enps-trend></app-enps-trend>
+                        </ng-container>
+                        <ng-container *ngIf="item.id == 'happiness'">
+                            <app-happiness-trend></app-happiness-trend>
+                        </ng-container>
+                        <ng-container *ngIf="item.id == 'flight'">
+                            <app-flight-trend></app-flight-trend>
+                        </ng-container>
+                    </div>
+                </div>
+            </ngu-tile>
+            <button NguCarouselPrev class="leftRs">&lt;</button>
+            <button NguCarouselNext class="rightRs">&gt;</button>
+        </ngu-carousel>
+    </div>
+</div>
+
+<div fxLayout="row" fxLayoutWrap *ngIf="chartvisible=='enps'" >
+    <app-enps-table fxFlex="100" fxFlex.lt-sm="100"  fxFlex.sm="50" [filters]="widgetFilters" ></app-enps-table>
+</div>
+<div fxLayout="row" fxLayoutWrap *ngIf="chartvisible=='happiness'">
+    <app-happiness-table fxFlex="100" fxFlex.lt-sm="100"  fxFlex.sm="50" [filters]="widgetFilters"  ></app-happiness-table>
+</div>
+<div fxLayout="row" fxLayoutWrap *ngIf="chartvisible=='flight'">
+    <app-flight-table fxFlex="100" fxFlex.lt-sm="100"  fxFlex.sm="50" [filters]="widgetFilters" ></app-flight-table>
+</div>
+<div fxLayout="row" fxLayoutWrap *ngIf="chartvisible=='hr'">
+    <app-hr-table fxFlex="100" fxFlex.lt-sm="100"  fxFlex.sm="50" [filters]="widgetFilters" ></app-hr-table>
+</div>

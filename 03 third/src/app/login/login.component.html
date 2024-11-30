@@ -1,0 +1,23 @@
+<h1> login works!</h1>
+
+<table border="1" >
+    <tr>
+        <td> user id </td>
+        <td>
+            <input type="text" #txtuserid >
+        </td>
+    </tr>
+    <tr>
+        <td> password  </td>
+        <td>
+            <input type="text" #textpass>
+        </td>
+    </tr>
+    
+    <tr>
+        <td (click)="login(txtuserid.value,textpass.value)" > login</td>
+        <td> 
+            <button> cancel </button>
+        </td> 
+    </tr>
+</table>

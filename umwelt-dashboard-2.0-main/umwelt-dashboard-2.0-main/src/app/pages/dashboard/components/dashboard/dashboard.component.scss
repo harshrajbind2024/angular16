@@ -1,0 +1,145 @@
+.mat-card {
+    padding: 5px;
+    margin: 5px;
+}
+.tile {
+    box-shadow: none !important;
+    border-radius: 0.5rem;
+}
+
+
+.leftRs, .rightRs {
+    display: none;
+}
+@media only screen and (min-width: 1300px) {
+    .leftRs {
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        width: 50px;
+        height: 50px;
+        box-shadow: 1px 2px 10px -1px rgba(0, 0, 0, .3);
+        border-radius: 999px;
+        left: 0;
+        background: whitesmoke;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .rightRs {
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        width: 50px;
+        height: 50px;
+        box-shadow: 1px 2px 10px -1px rgba(0, 0, 0, .3);
+        border-radius: 999px;
+        right: 0;
+        background: whitesmoke;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+}
+  
+ngx-tile{
+    padding-top: 0px;
+    padding-right: 0px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    
+    &:last-child{
+        padding-right: 10px !important;
+    }
+
+}
+@media (min-width: 1300px) {
+    ngx-tile{
+        width: 24.8% !important;
+    }
+}
+
+.hr-trend {
+    background: #fff;
+    color: #333;
+    font-family: 'Open Sans';
+    height: 240px;
+    padding: 20px;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+.enps-trend {
+    background: #fff;
+    color: #333;
+    font-family: 'Open Sans',sans-serif;
+    max-height: 240px ;
+    min-height: 240px ;
+    padding: 20px;
+    border-radius: 0.5rem;
+} 
+.happiness-trend {
+    background: #fff;
+    color: #333;
+    font-family: 'Open Sans';
+    height: 240px;
+    border-radius: 0.5rem;
+    padding: 20px;
+}
+.flight-trend {
+    background: #fff;
+    color: #333;
+    font-family: 'Open Sans';
+    height: 240px;
+    border-radius: 0.5rem;
+    padding: 20px;
+}
+@mixin panel{
+    font-size: 1rem;
+    border: 1px solid black;
+    border-color: #32adda;
+    border-radius: 15px;
+    padding: 2px;
+    line-height: normal;
+    cursor: pointer;
+}
+.hr-button{
+    width: 11.5rem;
+    @include panel()
+}
+.enps-button{
+    width: 6.5rem;
+    @include panel()
+}
+.happiness-button{
+    width: 8.5rem;
+    @include panel()
+}
+  
+.flight-button{
+    width: 7.5rem;
+    @include panel()
+}
+.hr-button:hover{
+    background:#32adda;
+    color:#fff;
+}
+.enps-button:hover{
+    background:#32adda;
+    color:#fff;
+}
+.happiness-button:hover{
+    background:#32adda;
+    color:#fff;
+}
+.flight-button:hover{
+    background:#32adda;
+    color:#fff;
+}
+::ng-deep .mat-button-focus-overlay {
+    background-color: unset;
+}

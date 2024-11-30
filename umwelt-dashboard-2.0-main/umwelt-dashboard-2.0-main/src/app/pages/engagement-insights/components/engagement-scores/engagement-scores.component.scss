@@ -1,0 +1,126 @@
+.insightsCard {
+    background: #5097da;
+    color: #fff;
+    font-family: 'Open Sans';
+    border-radius: 0.5rem;
+    padding: 20px;
+    width: 25%;
+    margin: 1% 0%;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    text-align: center;
+    font-weight: bold;
+    .title{
+        font-size: 22px;
+        margin: 10px 0px;
+    }
+    .score{
+        font-size: 7vw;
+        margin: 10px 0px;
+    }
+    .text{
+        font-size: 18px;
+        margin: 10px 0px;
+    }
+}
+
+.responseCard {
+    background: #fff;
+    color: #7f7f7f;
+    font-family: 'Open Sans';
+    border-radius: 0.5rem;
+    padding: 20px 40px;
+    width: 100%;
+    margin: 1% 0%;
+    margin-left: 2vw;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    text-align: center;
+    font-weight: bold;
+    .innercard{
+        .title{
+            color: black;
+            font-size: 20px;
+            margin: 10px 0px;
+            padding: 0px 90px;
+            width: max-content;
+        }
+        .score{
+            font-size: 5vw;
+            margin: 30px 0px;
+        }
+        .text{
+            color: #bdbdbd;
+            font-size: 18px;
+            margin: 10px 0px;
+        }
+        .subtext{
+            margin-top: auto;
+            color: #bdbdbd;
+            margin-bottom: 0px;
+        }
+    }
+    .divider{
+        height: 90%;
+        width: 3px;
+        background: #d9d9d9;
+    }
+}
+
+.colorMeterContainer{
+    .p{
+        height: 24px;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+    .colorMeter{
+        height: 24px;
+        width: calc(10vw);
+        border-radius: 5px;
+        margin-top: 15px;
+        margin-left: 15px;
+        box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+        overflow: hidden;
+        .green{
+            background-color: rgb(113, 186, 81);
+            // width: 3vw;
+            height: 100%;
+        }
+        .red{
+            background-color: rgb(252, 76, 76);
+            // width: 3vw;
+            height: 100%;
+        }
+        .yellow{
+            background-color: rgb(252, 173, 63);
+            // width: 4vw;
+            height: 100%;
+        }
+    }
+}
+
+.colorBox{
+    height: 30px;
+    width: 30px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+.green{
+    background-color: rgb(113, 186, 81);
+}
+.red{
+    background-color: rgb(252, 76, 76);
+}
+.yellow{
+    background-color: rgb(252, 173, 63);
+}
+
+.loading-shade {
+    position: absolute;
+    top: 3%;
+    left: 0;
+    bottom: 58%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+    display: flex;
+    // align-items: center;
+    justify-content: center;
+}

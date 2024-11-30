@@ -1,0 +1,39 @@
+<div class="main" style="position: relative;">
+    <app-action-scores id="action-score" [cap1]="cap1" [cap2]="cap2" [actioninsightsCardData]="actioninsightsCardData" (actionCuratedEvent)="goToCuratedTable($event)" ></app-action-scores>
+    <div class="main">
+      <mat-card style="display:grid; justify-items:center;">
+        <div *ngIf="actioninsightsCardData.current_total_actionsrequired === '-'" style="text-align: center;font-size: 20px;font-weight: 600;">
+          No Data Found for the entered range.
+        </div>
+        <div *ngIf="actioninsightsCardData.current_total_actionsrequired !== '-'" style="display:flex; position:relative; align-items:center; width:98%; height:100px; margin-bottom:10px">
+          <div [style.width.%] = "actioninsightsCardData.action_taken_percentage_graph" id="Div1">
+            <span *ngIf="actioninsightsCardData.action_taken_percentage_graph" class="innerdiv1" >{{actioninsightsCardData.action_taken_percentage_graph}} %</span>
+          </div>
+          <div [style.width.%]="actioninsightsCardData.action_pending_percentage_graph" id="Div2">
+            <span *ngIf="actioninsightsCardData.action_pending_percentage_graph"  class="innerdiv2" >{{actioninsightsCardData.action_pending_percentage_graph}} %</span>
+          </div>
+          <div [style.width.%]="actioninsightsCardData.total_saved_percentage_graph" id="Div3">
+            <span *ngIf="actioninsightsCardData.total_saved_percentage_graph" class="innerdiv3" >{{actioninsightsCardData.total_saved_percentage_graph}} %</span>
+          </div>
+        </div>
+  
+        <div style="display:flex; align-items:center; justify-content:center; padding:20px;">
+          <div  style="display:flex; align-items:center;">
+            <div class="colorBox" style="margin-left: 13px;" [style.background]="'royalblue'"></div>
+            <span style="margin-left: 10px;">Actions Taken</span>
+          </div>
+          <div  style="display:flex; align-items:center;">
+            <div class="colorBox" style="margin-left: 13px;" [style.background]="'red'"></div>
+            <span style="margin-left: 10px;">Actions Pending</span>
+          </div>
+          <div  style="display:flex; align-items:center;">
+            <div class="colorBox" style="margin-left: 13px;" [style.background]="'green'"></div>
+            <span style="margin-left: 10px;">People Saved</span>
+          </div>
+        </div>
+  
+      </mat-card>
+    </div>
+    <app-action-heatmap style="padding: 5px" [cap1]="cap1" [cap2]="cap2" [actioninsightsCardData]="actioninsightsCardData" [actionType]="actionType" [dateFilter]="auth.filter" [dateFilter2]="auth.filter2" [selectedFilters]="ouSelectedFilters" [empType]="empType"></app-action-heatmap>
+    <app-list-view #listview id="curated-table" [empType]="empType" [displayedColumns]="listViewColumns" [actionType]="actionType" [dateFilter]="auth.filter" [dateFilter2]="auth.filter2" [selectedFilters]="ouSelectedFilters" (recordActionEvent)="openActionModal($event)"></app-list-view>
+  </div>

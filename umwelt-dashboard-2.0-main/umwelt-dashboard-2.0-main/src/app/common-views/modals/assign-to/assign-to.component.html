@@ -1,0 +1,41 @@
+<div *ngIf="!inAction" fxLayout="column" class="components-container-gt-xs" fxLayoutGap="35px">
+    <mat-toolbar class="mat-elevation-z4" style="background: #32adda; margin-bottom: 35px;">
+      <h2 style="color: #FFF; font-weight: 200;">Assign HRSPOC To {{empname}}</h2>
+    </mat-toolbar>
+    <form [formGroup]="AssignHRSPOCForm">
+      <div>
+        <mat-form-field class="w-100">
+          <mat-select placeholder="Assign To" formControlName="hrspoc" panelClass="assigned-to-panel-class" disableOptionCentering>
+            <input class="search-box" type="text" (input)="changeInput($event,'hr')" placeholder="Search ...">
+            <mat-option *ngFor="let hr of hrspoc | customFilter:searchTextHrspoc" [value]="hr.HRSpocID">
+              {{hr.hrspoc_display}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div style="margin-top: 15px;">
+        <button mat-button mat-raised-button color="primary" (click)="submit()">Submit</button>
+        <button mat-button  (click)="cancel()">Close</button>
+      </div>
+    </form>
+  </div>
+  
+  <div *ngIf="inAction" fxLayout="column" class="components-container-gt-xs" fxLayoutGap="35px">
+    <mat-toolbar class="mat-elevation-z4" style="background: #32adda;">
+      <h2 style="color: #FFF; font-weight: 200;">Assign HRSPOC To {{empname}}</h2>
+    </mat-toolbar>
+    <div>
+      <mat-form-field class="w-100">
+        <mat-select placeholder="Assign To" [(ngModel)]="data.assignedto" panelClass="assigned-to-panel-class" disableOptionCentering>
+          <input class="search-box" type="text"  [(ngModel)]="searchAssign" placeholder="Search ...">
+          <mat-option *ngFor="let assignedto of hrspocs | customFilter:searchAssign" [value]="assignedto.HRSpocID">
+            {{assignedto.hrspoc_display}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div style="margin-top: 15px;">
+      <button mat-button mat-raised-button color="primary" (click)="addToAction()">Submit</button>
+      <button mat-button (click)="cancel()">Close</button>
+    </div>
+  </div>

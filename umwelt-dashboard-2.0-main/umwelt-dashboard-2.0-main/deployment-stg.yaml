@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: stg
+  name: dashboard-frontend-stg-deployment
+  labels:
+    app: dashboard-frontend-stg
+spec:
+  strategy:
+    type: Recreate  
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-frontend-stg
+  template:
+    metadata:
+      labels:
+        app: dashboard-frontend-stg
+    spec:
+      hostname: dashboard-frontend-stg
+      containers:
+        - name: dashboard-frontend-stg
+          image: 294339195387.dkr.ecr.<region>.amazonaws.com/uw-dashboard-frontend-stg:<VERSION>
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: '1024Mi'
+              cpu: '250m'
+            limits:
+              memory: '1024Mi'
+              cpu: '250m'
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+      nodeSelector:
+        noderole: app             
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: stg
+  name: dashboard-frontend-stg-svc
+  labels:
+    svc: dashboard-frontend-stg
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: dashboard-frontend-stg

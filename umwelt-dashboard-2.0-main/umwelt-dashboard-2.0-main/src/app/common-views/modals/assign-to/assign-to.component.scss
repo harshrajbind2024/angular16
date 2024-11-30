@@ -1,0 +1,10 @@
+.components-container-gt-xs {
+    padding: 20px;
+}
+.search-box{
+    width: 93%;
+    margin: 5% 0% 3% 3%;
+  }
+::ng-deep .mat-select-value{
+    color: black !important;
+}

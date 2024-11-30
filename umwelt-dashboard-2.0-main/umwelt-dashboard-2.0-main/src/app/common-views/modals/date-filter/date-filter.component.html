@@ -1,0 +1,169 @@
+<mat-toolbar class="date-filter-modal-toolbar">Filter
+    <button mat-icon-button (click)="closeModal()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <mat-tab-group class="date-filter-modal-tabs" *ngIf="type != 'presense-snapshot' && type != 'presense-dailytrend'">
+    <mat-tab label="Range">
+      <div class="d-flex flex-column flex-1 p-1" style="height: 310px;">
+        <form [formGroup]="rangeFormGroup" class="d-flex flex-column">
+          <mat-form-field>
+            <mat-select placeholder="Type" formControlName="type">
+              <mat-option *ngFor="let period of periods" [value]="period.id" (click)="changeType(period)">
+                {{ period.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <h3 *ngIf="type != 'employee-insights'">From:</h3>
+          <div class="d-flex">
+            <ng-container *ngIf="this.rangeFormGroup.value.type === '1'">
+              <mat-form-field class="mr-1 flex-grow-1">
+                <mat-select placeholder="Month" formControlName="monthStart">
+                  <mat-option *ngFor="let month of months" [value]="month.id">
+                    {{ month.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+  
+            <ng-container *ngIf="this.rangeFormGroup.value.type === '2'">
+              <mat-form-field class="mr-1 flex-grow-1">
+                <mat-select placeholder="Quarter" formControlName="quarterStart">
+                  <mat-option *ngFor="let quarter of quarters" [value]="quarter.id">
+                    {{ quarter.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+  
+            <ng-container *ngIf="this.rangeFormGroup.value.type !== '4'">
+              <mat-form-field class="flex-grow-1">
+                <mat-select placeholder="Year" formControlName="yearStart">
+                  <mat-option *ngFor="let year of years" [value]="year.id">
+                    {{ year.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+  
+            <ng-container *ngIf="this.rangeFormGroup.value.type === '4'">
+              <mat-form-field class="flex-grow-1">
+                <input matInput [matDatepicker]="pickFrom" placeholder="From" formControlName="pickfrom" [max]="maxDateForFrom()" (dateChange)="fromDateChange($event.value)">
+                <mat-datepicker-toggle matSuffix [for]="pickFrom"></mat-datepicker-toggle>
+                <mat-datepicker #pickFrom></mat-datepicker>
+              </mat-form-field>
+            </ng-container>
+  
+          </div>
+          <div class="d-flex" *ngIf="(type === 'employee-insights' && fromActionPage)">
+            <ng-container *ngIf="this.rangeFormGroup.value.type === '4'">
+              <mat-form-field class="flex-grow-1">
+                <input matInput [matDatepicker]="pickTo" placeholder="To" formControlName="pickto" [min]="minDateForTo()" [max]="todayDate()" (dateChange)="toDateChange($event.value)">
+                <mat-datepicker-toggle matSuffix [for]="pickTo"></mat-datepicker-toggle>
+                <mat-datepicker #pickTo></mat-datepicker>
+              </mat-form-field>
+            </ng-container>
+          </div>
+          <ng-container *ngIf="type != 'employee-insights'">
+            <h3>To:</h3>
+            <div class="d-flex">
+    
+              <ng-container *ngIf="this.rangeFormGroup.value.type === '1'">
+                <mat-form-field class="mr-1 flex-grow-1">
+                  <mat-select placeholder="Month" formControlName="monthEnd">
+                    <mat-option *ngFor="let month of months" [value]="month.id">
+                      {{ month.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </ng-container>
+    
+              <ng-container *ngIf="this.rangeFormGroup.value.type === '2'">
+                <mat-form-field class="mr-1 flex-grow-1">
+                  <mat-select placeholder="Quarter" formControlName="quarterEnd">
+                    <mat-option *ngFor="let quarter of quarters" [value]="quarter.id">
+                      {{ quarter.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </ng-container>
+    
+              <mat-form-field class="flex-grow-1">
+                <mat-select placeholder="Year" formControlName="yearEnd">
+                  <mat-option *ngFor="let year of years" [value]="year.id">
+                    {{ year.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+    </mat-tab>
+    <mat-tab label="FilterBy">
+      <div class="d-flex flex-column flex-1 p-1" style="height: 310px;">
+        <form [formGroup]="rangeFormGroup" class="d-flex flex-column">
+          <h3>Select Filter:</h3>
+          <div class="d-flex">
+            <mat-radio-group class="filter-by-btns" formControlName="dateFilterBy">
+              <div style="margin-bottom: 15px;">
+              <mat-radio-button value="StartTime">Chat Sent On</mat-radio-button>
+              </div>
+              <div>
+              <mat-radio-button value="EndTime">Chat Completed On</mat-radio-button>
+              </div>
+            </mat-radio-group>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+  <mat-tab-group class="date-filter-modal-tabs" *ngIf="type == 'presense-snapshot' || type == 'presense-dailytrend'">
+    <mat-tab label="Range">
+      <div class="d-flex flex-column flex-1 p-1" style="height: 310px;">
+        <form [formGroup]="dateFormGroup" class="d-flex flex-column">
+          <mat-form-field>
+            <mat-select placeholder="Type" formControlName="type">
+              <mat-option *ngFor="let type of types" [value]="type.id">
+                {{type.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <h3>From:</h3>
+          <div class="d-flex" *ngIf="type == 'presense-snapshot'">
+            <mat-form-field class="flex-grow-1">
+              <input matInput [matDatepicker]="from" formControlName="fromDate" placeholder="From Date" readonly>
+              <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
+              <mat-datepicker #from></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="d-flex" *ngIf="type == 'presense-dailytrend'">
+            <mat-form-field class="flex-grow-1">
+              <input matInput [matDatepicker]="from" formControlName="fromDate" (dateChange)="onDateChange(from)" placeholder="From Date" readonly>
+              <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
+              <mat-datepicker #from></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <h3>To:</h3>
+          <div class="d-flex" *ngIf="type == 'presense-snapshot'">
+            <mat-form-field class="flex-grow-1">
+              <input matInput [matDatepicker]="to" formControlName="toDate" placeholder="To Date" readonly>
+              <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
+              <mat-datepicker #to></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="d-flex" *ngIf="type == 'presense-dailytrend'">
+            <mat-form-field class="flex-grow-1">
+              <input matInput [matDatepicker]="to" formControlName="toDate" placeholder="To Date" readonly>
+              <mat-datepicker-toggle matSuffix [for]="to" disabled></mat-datepicker-toggle>
+              <mat-datepicker #to></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+  <mat-toolbar class="date-filter-modal-footer">
+      <button mat-button (click)="closeModal()">Cancel</button>
+      <button mat-button color="primary" (click)="apply()">Apply</button>
+  </mat-toolbar>

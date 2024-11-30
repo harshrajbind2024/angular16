@@ -1,0 +1,30 @@
+
+.main{
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+mat-card{
+    padding: 15px;
+}
+
+#enagagementFilterHeader{
+    // transition: 0.5s;
+    width: calc(100% - 50px);
+    // position: fixed;
+    // z-index: 1;
+    position: absolute;
+}
+// #enagagementFilterHeader.active{
+//     top: 110px;
+//     left: 0%;
+//     width: calc(100%);
+//     border-radius:0px
+// }
+
+// ::ng-deep .ng-scroll-content {
+//     max-width: 100%;
+//     overflow-x: hidden !important;
+//     overflow-y: hidden !important;
+// }

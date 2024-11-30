@@ -1,0 +1,76 @@
+<div class="d-flex w-100">
+    <div class="insightsCard" (click)="actionCuratedTable('action-required')" matTooltip="Click here to View Employees" [ngClass]="{'selected-card': isClickedActionRequired}">
+        <div class="title">
+            Actions Required
+        </div>
+        
+        <div style="display: flex;flex-direction: row;">
+            <div class="score">
+                <span class="score-num">{{actioninsightsCardData.current_total_actionsrequired}}</span>
+                <span class="action-percent" *ngIf="actioninsightsCardData.current_actionsrequired_percentage">{{actioninsightsCardData.current_actionsrequired_percentage}}</span>
+            </div>
+        </div>
+        <div class="statement" *ngIf="actioninsightsCardData.conv_completed">
+            <span style="color:red">{{actioninsightsCardData.total_risk}}</span> of {{actioninsightsCardData.conv_completed}} in Risk
+        </div>
+        <div class="text">
+            <span *ngIf="actioninsightsCardData.comparison_totalactiondata && actioninsightsCardData.show_bottom_line">{{actioninsightsCardData.comparison_totalactiondata}} {{cap2}}</span>
+        </div>
+    </div>
+    <div class="insightsCard" (click)="actionCuratedTable('action-taken')" matTooltip="Click here to View Employees" [ngClass]="{'selected-card': isClickedActionTaken}">
+        <div class="title">
+            Actions Taken
+        </div>
+        <div style="display: flex;flex-direction: row;" >
+            <div class="score">
+                <span class="score-num">{{actioninsightsCardData.current_completed_actions}}</span>
+                <span class="action-percent" *ngIf="actioninsightsCardData.action_taken_percentage">{{actioninsightsCardData.action_taken_percentage}}</span>
+            </div>
+        </div>
+        <div class="statement" *ngIf="actioninsightsCardData.conv_completed">
+            <div style="height:22px"></div>
+        </div>
+        <div class="text">
+            <span *ngIf="actioninsightsCardData.comparison_actions_taken && actioninsightsCardData.show_bottom_line">{{actioninsightsCardData.comparison_actions_taken}} {{cap2}}</span>
+        </div>
+    </div>
+    <div class="insightsCard" (click)="actionCuratedTable('action-pending')" matTooltip="Click here to View Employees" [ngClass]="{'selected-card': isClickedActionPending}">
+        <div class="title">
+            Actions Pending
+        </div>
+        
+        <div style="display: flex;flex-direction: row;">
+            <div class="score">
+                <span class="score-num">{{actioninsightsCardData.current_pending_actions}}</span>
+                <span class="action-percent" *ngIf="actioninsightsCardData.action_pending_percentage">{{actioninsightsCardData.action_pending_percentage}}</span>
+            </div>
+        </div>
+        <div class="statement" *ngIf="actioninsightsCardData.conv_completed">
+            <div style="height:22px"></div>
+        </div>
+        <div class="text">
+            <span *ngIf="actioninsightsCardData.comparison_actions_pending && actioninsightsCardData.show_bottom_line">{{actioninsightsCardData.comparison_actions_pending}} {{cap2}}</span>
+        </div>
+    </div>
+    <div class="insightsCard" matTooltip="Click here to View Employees" (click)="actionCuratedTable('people-saved')" [ngClass]="{'selected-card': isClickedPeopleSaved}">
+        <div class="title">
+            People Saved
+        </div>
+
+        <div style="display: flex;flex-direction: row;">
+            <div class="score">
+                <span class="score-num">{{actioninsightsCardData.current_total_saved}}</span>
+                <span class="action-percent" *ngIf="actioninsightsCardData.total_saved_percentage">{{actioninsightsCardData.total_saved_percentage}}</span>
+            </div>
+        </div>
+        <div class="statement" *ngIf="actioninsightsCardData.total_risk">
+            <span style="color:green">{{actioninsightsCardData.total_saved}}</span> of {{actioninsightsCardData.total_risk}} Saved
+        </div>
+        <div class="statement" *ngIf="!actioninsightsCardData.total_risk && actioninsightsCardData.conv_completed">
+            <div style="height:22px"></div>
+        </div>
+        <div class="text">
+            <span *ngIf="actioninsightsCardData.comparison_total_saved && actioninsightsCardData.show_bottom_line">{{actioninsightsCardData.comparison_total_saved}} {{cap2}}</span>
+        </div>
+    </div>
+</div>

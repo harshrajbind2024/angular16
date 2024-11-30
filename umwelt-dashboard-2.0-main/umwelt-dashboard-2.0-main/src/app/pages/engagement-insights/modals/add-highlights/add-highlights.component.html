@@ -1,0 +1,170 @@
+<div class="high">
+    <div class="headerr" style="text-transform: capitalize;">
+        <!-- {{dataCopy.type}} <span *ngIf="dataCopy.type=='greater' || dataCopy.type=='lesser'">than</span> -->
+        {{dataCopy.type}} <span *ngIf="dataCopy.type=='greater' || dataCopy.type=='lesser'"> than or equal to</span>
+        <mat-icon *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom' && !dataCopy.respondentFlag" class="help-icon" [matTooltipClass]="'tooltip'" (click)="tooltip4.toggle()" #tooltip4="matTooltip" [matTooltipPosition]="'right'" 
+        [matTooltip]="dataCopy.type=='greater' || dataCopy.type=='between' ? 'You can apply conditional formatting on multiple values by using +Add value and selecting color for each value. The values should be from Higher -> Lower' : 'You can apply conditional formatting on multiple values by using +Add value and selecting color for each value. The values should be from Lower -> Higher'"
+        >info</mat-icon>
+    </div>
+    <div class="p-1">
+        <div (click)="addValue()" *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom' && !dataCopy.respondentFlag" style="cursor: pointer;color: #3aadda;">+ Add value</div>
+
+
+        <div *ngIf="!dataCopy.respondentFlag">
+            <table mat-table [dataSource]="dataCopy[dataCopy.type]" >
+                <ng-container matColumnDef="index">
+                  <th mat-header-cell *matHeaderCellDef> No. </th>
+                  <td mat-cell *matCellDef="let element"> {{element.index+1}} </td>
+                </ng-container>
+                <ng-container matColumnDef="Value">
+                  <th mat-header-cell *matHeaderCellDef><ng-container *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom'"><span *ngIf="valueType == 'percentage'">Engaged Value</span><span *ngIf="valueType != 'percentage'">Rating Value</span> <span *ngIf="dataCopy.type=='between'">1 </span></ng-container><ng-container *ngIf="dataCopy.type=='top' || dataCopy.type=='bottom'">Value</ng-container></th>
+                  <td mat-cell *matCellDef="let element"> 
+                    <mat-form-field class="example-full-width" appearance="outline" style="margin: 0px 15px;" [ngStyle]="{'width': valueType == 'percentage' && dataCopy.type!='top' && dataCopy.type!='bottom' ? '80px':'150px'}" >
+                        <!-- <input matInput [(ngModel)]="element.value" (input)="validateError()" type="number"> -->
+                        <ng-container *ngIf="valueType == 'percentage' && dataCopy.type!='top' && dataCopy.type!='bottom'">
+                        <input matInput [(ngModel)]="element.pervalue" (input)="validateError(element)" type="number">
+                        </ng-container>
+                        <ng-container *ngIf="valueType == 'value' && dataCopy.type!='top' && dataCopy.type!='bottom'">
+                        <input matInput [(ngModel)]="element.value" (input)="validateError(element)" type="number">
+                        </ng-container>
+                        <ng-container *ngIf="dataCopy.type=='top' || dataCopy.type=='bottom'">
+                        <input matInput [(ngModel)]="element.value" (input)="validateError(element)" type="number">
+                        </ng-container>
+                    </mat-form-field>
+                    <span style="margin-left: -10px; margin-right: 15px;" *ngIf="valueType == 'percentage' && dataCopy.type!='top' && dataCopy.type!='bottom'">%</span>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="Value2">
+                  <th mat-header-cell *matHeaderCellDef> <span *ngIf="valueType == 'percentage'">Engaged Value2</span><span *ngIf="valueType != 'percentage'">Rating Value2</span> </th>
+                  <td mat-cell *matCellDef="let element"> 
+                    <mat-form-field class="example-full-width" appearance="outline" style="margin: 0px 15px;" [ngStyle]="{'width': valueType == 'percentage' ? '80px':'150px'}">
+                        <ng-container *ngIf="valueType == 'percentage'">
+                        <input matInput [(ngModel)]="element.pervalue2" (input)="validateError(element)"  type="number">
+                        </ng-container>
+                        <ng-container *ngIf="valueType == 'value'">
+                        <input matInput [(ngModel)]="element.value2" (input)="validateError(element)"  type="number">
+                        </ng-container>
+                    </mat-form-field>
+                    <span style="margin-left: -10px; margin-right: 15px;" *ngIf="valueType == 'percentage'">%</span>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="label">
+                    <th mat-header-cell *matHeaderCellDef> Label </th>
+                    <td mat-cell *matCellDef="let element"> 
+                      <mat-form-field class="example-full-width" appearance="outline" style="margin: 0px 15px;">
+                          <input matInput [(ngModel)]="element.label" (input)="validateError(element)"  type="text">
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                <ng-container matColumnDef="with">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let element" style="padding: 0px 15px;"> with </td>
+                </ng-container>
+                <ng-container matColumnDef="fill">
+                    <th mat-header-cell *matHeaderCellDef>Fill color</th>
+                    <td mat-cell *matCellDef="let element" style="padding: 0px 15px;"> 
+                        <div style="display: flex;align-items: center;">
+                            <div class="colorBox" (click)="pickColor('#9292ff','bg',element.index)" style="background: #9292ff;" [ngClass]="{'coloActive':element.bg=='#9292ff'}"></div>
+                            <div class="colorBox" (click)="pickColor('#dbdbff','bg',element.index)" style="background: #dbdbff;" [ngClass]="{'coloActive':element.bg=='#dbdbff'}"></div>
+                            <div class="colorBox" (click)="pickColor('#ffdbdb','bg',element.index)" style="background: #ffdbdb;" [ngClass]="{'coloActive':element.bg=='#ffdbdb'}"></div>
+                            <div class="colorBox" (click)="pickColor('#ff9292','bg',element.index)"style="background: #ff9292;" [ngClass]="{'coloActive':element.bg=='#ff9292'}"></div>
+                            <div class="colorBox" (click)="pickColor('#ff4949','bg',element.index)"style="background: #ff4949;" [ngClass]="{'coloActive':element.bg=='#ff4949'}"></div>
+                            <!-- <div class="colorBox" (click)="pickColor('rgb(252, 76, 76)','bg',element.index)" style="background: rgb(252, 76, 76);" [ngClass]="{'coloActive':element.bg=='rgb(252, 76, 76)'}"></div>
+                            <div class="colorBox" (click)="pickColor('rgb(134, 22, 90)','bg',element.index)" style="background: rgb(134, 22, 90);" [ngClass]="{'coloActive':element.bg=='rgb(134, 22, 90)'}"></div>
+                            <div class="colorBox" (click)="pickColor('rgb(252, 173, 63)','bg',element.index)" style="background: rgb(252, 173, 63);" [ngClass]="{'coloActive':element.bg=='rgb(252, 173, 63)'}"></div>
+                            <div class="colorBox" (click)="pickColor('rgb(113, 186, 81)','bg',element.index)"style="background: rgb(113, 186, 81);" [ngClass]="{'coloActive':element.bg=='rgb(113, 186, 81)'}"></div>     -->
+                        </div>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="customfill">
+                    <th mat-header-cell *matHeaderCellDef>Custom Fill color</th>
+                    <td mat-cell *matCellDef="let element" style="padding: 0px 15px;"> 
+                        <div style="display: flex;align-items: center;justify-content: center;">
+                            <input type="color" [(ngModel)]="element.bg" (input)="validateError(element)" />
+                        </div>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="delete">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element"> 
+                    <button mat-icon-button (click)="removeIndex(element.index)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+           </table>
+        </div>
+        <div *ngIf="dataCopy.respondentFlag">
+            <table mat-table [dataSource]="dataCopy[dataCopy.type]">
+                <ng-container matColumnDef="RespondentValue">
+                    <th mat-header-cell *matHeaderCellDef>Value</th>
+                    <td mat-cell *matCellDef ="let element"> 
+                      <mat-form-field class="example-full-width" appearance="outline" style="width: 150px;" >
+                        <input matInput [(ngModel)]="element.value" (input)="validateErrorAll()" type="number">   
+                      </mat-form-field>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        <div *ngIf="error" style="text-align: center;color: red;margin-top: 15px;">
+            {{error}}
+        </div>
+
+
+
+        <!-- <div style="margin-top: 5px;" *ngFor="let item of dataCopy[dataCopy.type];let i = index">
+            <div class="d-flex align-items-center">
+                <div style="margin-right: 5px;" *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom'">
+                    {{i+1}}. 
+                </div>
+                <ng-container >
+                    <div>
+                        <div class="d-flex align-items-center" >
+                            <mat-label style="margin-right:10px">Value <span *ngIf="dataCopy.type=='between'">1</span></mat-label>
+                            <div>
+                                <mat-form-field class="example-full-width" appearance="outline">
+                                    <input matInput [(ngModel)]="item.value" type="number">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <mat-label style="margin-right:10px" *ngIf="dataCopy.type=='between'">Value 2</mat-label>
+                            <div>
+                                <mat-form-field class="example-full-width" appearance="outline" *ngIf="dataCopy.type=='between'">
+                                    <input matInput [(ngModel)]="item.value2" type="number">
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin: 0px 20px;" *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom'">
+                        with
+                    </div>
+                </ng-container>
+                <div class="d-flex align-items-center" *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom'">
+                    <div class="d-flex">
+                        <div style="margin-right: 3px;">Fill color</div>
+                        <div class="d-flex">
+                            <div class="colorBox" (click)="pickColor('#ff0000','bg',i)" style="background: red;" [ngClass]="{'coloActive':item.bg=='#ff0000'}"></div>
+                            <div class="colorBox" (click)="pickColor('#ffffff','bg',i)" style="background: white;" [ngClass]="{'coloActive':item.bg=='#ffffff'}"></div>
+                            <div class="colorBox" (click)="pickColor('#d3b531','bg',i)" style="background: #d3b531;" [ngClass]="{'coloActive':item.bg=='#d3b531'}"></div>
+                            <div class="colorBox" (click)="pickColor('#92d050','bg',i)"style="background: #92d050;" [ngClass]="{'coloActive':item.bg=='#92d050'}"></div>
+                        </div>
+                    </div>
+                    <div class="ml-2" *ngIf="dataCopy.type!='top' && dataCopy.type!='bottom'">
+                        <button mat-mini-fab color="primary" (click)="removeIndex(i)" style="background-color: #3aadda;">
+                            <mat-icon style="color: white;">delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <div class="d-flex justify-content-center mt-2">
+          <button mat-raised-button color="primary" [disabled]="error!=''" (click)="submit()" style="margin-left: 20px;">Submit</button>
+          <button mat-raised-button color="primary" (click)="dialogRef.close()" style="margin-left: 20px;background-color: grey;">Cancel</button>
+        </div>
+    </div>
+</div>

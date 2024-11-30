@@ -1,0 +1,192 @@
+#actionheatmap{
+    // thead th {
+    //     border-bottom: rgba(0, 0, 0, 0.12) solid 1px;
+    //     border-left: rgba(0, 0, 0, 0.12) solid 1px;
+    //     border-right: rgba(0, 0, 0, 0.12) solid 1px;
+    //     border-top: rgba(0, 0, 0, 0.12) solid 1px;
+    // }
+    .mat-header-cell, .mat-cell-index{
+        // border-bottom: rgba(0, 0, 0, 0.12) solid 1px;
+        // border-left: rgba(0, 0, 0, 0.12) solid 1px;
+        // border-right: #f2f2f2 solid 2px;
+        border-top: #f2f2f2 solid 2px;
+    }
+    .mat-cell{
+        // border-bottom: rgba(0, 0, 0, 0.12) solid 1px;
+        // border-left: rgba(0, 0, 0, 0.12) solid 1px;
+        border-right: white solid 2px;
+        // border-top: white solid 2px;   #comment only when white border
+        // min-width:50px;
+    }
+}
+
+.mat-row:nth-child(1){
+    .mat-cell{
+        font-weight: bold;
+        border-bottom: white solid 2px;
+    }
+    .mat-cell:first-of-type{
+        background-color: lightgray;
+    }
+}
+
+// table { 
+//     border-collapse: separate;
+//     background-color: rgb(242, 242, 242);
+// }
+
+th.rotated-text {
+    position: relative;
+    // white-space: nowrap;
+  }
+th.rotated-text > div {
+    position: absolute;
+    bottom: 0;
+    // margin-left: 35px;
+    margin-bottom: 8px;
+    // transform: rotate(-45deg);
+    // transform-origin: 0 100%;
+    width: 100%;
+    // text-align: left; 
+    text-align: center;  
+    top: 0px;
+    right: 0px;
+}
+
+#table1 {
+    .mat-cell {
+        border-bottom: white solid 2px;
+        border-top: white solid 2px;
+        background-color: #f2f2f2;
+    }
+    td.mat-cell:first-of-type{
+        border-left: white solid 2px;
+    }
+    td.mat-cell:last-of-type{
+        border-right: white solid 2px;
+    }
+    th.mat-header-cell:first-of-type{
+        border-top: white solid 2px;
+        background-color: white;
+    }
+}
+#table2 {
+    // border: white solid 2px;
+    background-color: #f2f2f2;
+}
+#table3 {
+    // border: white solid 2px;
+    background-color: #f2f2f2;
+}
+#table4 {
+    // border: white solid 2px;
+    background-color: #f2f2f2;
+    td.mat-footer-cell:first-of-type{
+        background-color: white;
+    }
+}
+
+.mat-header-cell{
+    font-weight: bold;
+    font-size: 14px;
+    color: black;
+    text-align: center;
+    border-right: #f2f2f2 solid 2px; 
+    // height: 150px;
+}
+.mat-cell{
+    font-weight: normal;
+    color: black;
+    font-size: 14px;
+    text-align: center;
+}
+td.mat-cell, td.mat-footer-cell, th.mat-header-cell {
+    padding: 0;
+    border-bottom-width: 0px;
+    border-bottom-style: solid;
+}
+td.mat-cell:not(.mat-cell:first-of-type, th.mat-header-cell){
+    min-width: 100px;
+}
+td.mat-cell:first-of-type, td.mat-footer-cell:first-of-type, th.mat-header-cell:first-of-type {
+    white-space: nowrap;
+    padding-left: 5px;
+    min-width: 170px !important;
+    font-size: 14px;
+}
+td.mat-cell:last-of-type, td.mat-footer-cell:last-of-type, th.mat-header-cell:last-of-type {
+    padding-right: 0px;
+}
+
+.tableFactors, #tableFactors {
+    overflow-x: auto !important;
+    overflow-y:hidden !important;
+    // min-width:400px;
+    max-width:1800px;
+}
+
+.loading-shade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+    display: flex;
+    // align-items: center;
+    justify-content: center;
+}
+
+.headerZoom{
+    margin-left: 0px;
+    font-weight: bold;
+    color: #5097da;
+    transition: 0.3s ease;
+    font-size: 15px;
+}
+// .headerZoom:hover{
+//     transform: scale(1.1);
+// }
+
+.legend{
+    border-spacing: 0px;
+   th{
+    width: 80px;
+    font-weight: bold;
+    box-shadow: rgba(0, 0, 0, 0.55) 1.95px 1.95px 2.6px;
+   } 
+   tr {
+    height: 35px;
+    text-align: center;
+    white-space: break-spaces;
+   }
+}
+
+.arrow {
+    width: 440px;
+    margin-bottom: 22px;
+  }
+  .line {
+    margin-top: 18px;
+    width: 407px;
+    background: #454547;
+    height: 3px;
+    float: left;
+  }
+  .point {
+    width: 15px;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 18px solid #454547;
+    float: right;
+    margin-top: 10px;
+  }
+
+// td.mat-cell.cdk-column-actionRequired.mat-column-actionRequired.ng-star-inserted {
+//     min-width: 150px;
+// }
+th.mat-header-cell.cdk-column-head.mat-column-head.ng-star-inserted {
+    border-right: white solid 2px;
+}

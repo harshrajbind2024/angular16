@@ -1,0 +1,25 @@
+<ng-container *ngIf="graphs.length > 0">
+    <div fxLayout="row" fxLayoutWrap>
+        <div class="custom-graphs">
+            <ng-container *ngFor="let graph of graphs; let i = index">
+                <div class="custom-graph-body" [class.fb-100]="i === 0">
+                    <p class="text-align-center">{{graph.upperlabel}}</p>
+                    <ng-container *ngIf="graph.upperlabel == 'Flight Risk'">
+                        <app-donut2d [showGraph]="true" [radius]="graph.radius" [value]="graph.value" [label]="graph.label"
+                        [color]="graph.color" [colorModerate]="graph.colorModerate" [labelModerate]="graph.labelModerate" [valueModerate]="graph.valueModerate" [id]="graph.id"></app-donut2d>
+                    </ng-container>
+                    <ng-container *ngIf="graph.upperlabel != 'Flight Risk'">
+                        <app-donut2d [showGraph]="true" [radius]="graph.radius" [value]="graph.value" [label]="graph.label"
+                        [color]="graph.color" [id]="graph.id"></app-donut2d>
+                    </ng-container>
+                    <p class="text-align-center" [innerHtml]="graph.lowerLabel"></p>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</ng-container>
+<ng-container *ngIf="graphs.length <= 0">
+    <div class="loading-text">
+        Loading...
+    </div>
+</ng-container>

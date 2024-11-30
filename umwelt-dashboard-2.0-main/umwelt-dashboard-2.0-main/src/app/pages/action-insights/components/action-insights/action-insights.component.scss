@@ -1,0 +1,62 @@
+.main{
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+mat-card{
+    padding: 15px;
+}
+.colorBox{
+    height: 30px;
+    width: 30px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+#Div1 {
+    display: flex;
+    background-color: royalblue;
+    // width: 90%;
+    height: 75%;
+    .innerdiv1{
+        display:flex;
+        justify-content:center;
+        color:black;
+        font-weight:bold;
+        align-self: center;
+        margin: 0 auto;
+        margin-top: 100px;
+        white-space: nowrap;
+    }
+}  
+#Div2 {
+    display: flex;
+    background-color: red;
+    // width: 10%;
+    height: 75%;
+    .innerdiv2{
+        display:flex;
+        justify-content:center;
+        color:black;
+        font-weight:bold;
+        align-self: center;
+        margin: 0 auto;
+        margin-top: 100px;
+        white-space: nowrap;
+    }
+}
+#Div3 {
+    display: flex;
+    background-color: green;
+    position: absolute;
+    // width: 90%;
+    height: 40%;
+    .innerdiv3{
+        display:flex;
+        justify-content:center;
+        color:white;
+        font-weight:bold;
+        align-self: center;
+        margin: 0 auto;
+        white-space: nowrap;
+    }
+}

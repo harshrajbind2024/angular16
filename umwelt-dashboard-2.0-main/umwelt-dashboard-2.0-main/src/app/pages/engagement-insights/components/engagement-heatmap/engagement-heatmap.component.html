@@ -1,0 +1,834 @@
+<mat-card class="p-0" id="engagementheatmap">
+    <div class="p-1">
+        <div [formGroup]="engagementOptForm" class="d-flex" style="display: flex;align-items: center; margin-bottom: -18px;">
+
+            <mat-form-field appearance="outline" style="margin-right: 1.5rem;">
+                <mat-label>Group By</mat-label>
+                <mat-select formControlName="ouVal" (selectionChange)="submit($event.value)">
+                    <mat-option value="{{list.CompanyID}}">{{list.CompanyID}}</mat-option>
+                    <mat-option value="{{list.BusinessUnitID}}">{{list.BusinessUnitID}}</mat-option>
+                    <mat-option value="{{list.FuncID}}">{{list.FuncID}}</mat-option>
+                    <mat-option value="{{list.DeptID}}">{{list.DeptID}}</mat-option>
+                    <mat-option value="{{list.SubDeptID}}">{{list.SubDeptID}}</mat-option>
+                    <mat-option value="{{list.RoleID}}">{{list.RoleID}}</mat-option>
+                    <mat-option value="{{list.ZoneID}}">{{list.ZoneID}}</mat-option>
+                    <mat-option value="{{list.LocID}}">{{list.LocID}}</mat-option>
+                    <mat-option value="{{list.SubLocID}}">{{list.SubLocID}}</mat-option>
+                    <mat-option value="{{list.BandID}}">{{list.BandID}}</mat-option>
+                    <mat-option value="{{list.Manager}}">{{list.Manager}}</mat-option>
+                    <mat-option value="{{list.HRSpoc}}">{{list.HRSpoc}}</mat-option>
+                    <mat-option value="Gender">{{list.Gender}}</mat-option>
+                    <mat-option value="{{list.Stage}}">{{list.Stage}}</mat-option>
+                    <mat-option value="Intervention Name">Intervention Name</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="margin-right: 1.5rem;">
+                <mat-label>View By</mat-label>
+                <mat-select formControlName="heatmapVal">
+                    <mat-option (click)="showTablesFor('factors')" value="factors">Factors</mat-option>
+                    <mat-option (click)="showTablesFor('drivers')" value="drivers">Drivers</mat-option>
+                    <mat-option (click)="showTablesFor('questions')" value="questions">Questions</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="margin-right: 1.5rem;">
+                <mat-label>Hightlight Cell Rules</mat-label>
+                <mat-select formControlName="highlightVal" (selectionChange)="changeHighlightVal($event.value)">
+                    <mat-optgroup *ngFor="let group of colorscaleList" [label]="group.name" >
+                      <mat-option *ngFor="let task of group.colorscaleOpts" [value]="task.ColorScaleID">
+                        <div style="display: flex; flex-direction: row; align-items: center; gap: 15px;">
+                            <span>{{task.ColorScaleName}}</span>
+                            <div class="color-boxes">
+                                <div *ngFor="let color of task.ColorScale" class="color-box" [style.backgroundColor]="color"></div>
+                            </div>
+                        </div>
+                      </mat-option>
+                    </mat-optgroup>
+                    <mat-option (click)="addHighlightValues('greater')" value="greater">Greater than or equal to (≥)</mat-option>
+                    <mat-option (click)="addHighlightValues('lesser')" value="lesser">Lesser than or equal to (≤)</mat-option>
+                    <mat-option (click)="addHighlightValues('between')" value="between">Between</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Top/Bottom Rules</mat-label>
+                <mat-select formControlName="topBottomVal" (selectionChange)="changeTopBottomVal($event.value)">
+                    <mat-option (click)="addHighlightValues('top')" value="top">Top</mat-option>
+                    <mat-option (click)="addHighlightValues('bottom')" value="bottom">Bottom</mat-option>
+                    <mat-option (click)="insights.topBottomRuleSelected='aboveaverage';submit()" value="aboveaverage">Above Average</mat-option>
+                    <mat-option (click)="insights.topBottomRuleSelected='belowaverage';submit()" value="belowaverage">Below Average</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <div *ngIf="showMagicBox" class="callouts" style="z-index: 99999;">
+                <div class="callouts--right">
+                    <div [ngClass]="{'close-icon-before': intelHeatmapService.showLoading,'close-icon-after': !intelHeatmapService.showLoading}" style="cursor: pointer;">
+                        <mat-icon class="close" (click)="closeMagicBox()">close</mat-icon>
+                    </div>
+                    <div *ngIf="intelHeatmapService.showLoading">
+                        <div class="chat-respond" fxLayout="row" fxLayoutAlign="start center">
+                            <div class="smilies-head nikki-typing">
+                                Nikki is typing ...
+                            </div>
+                        </div>
+                    </div>
+                    <div [ngClass]="{'rich-text-container': !intelHeatmapService.showLoading}" style="font-size: 14px;" [innerHTML]="insights.showMagicResponse"></div>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <span *ngIf="showDownloadingMsg" style="padding-bottom: 1.2rem; padding-right: 4rem; font-size: 13px;">Please wait, we are downloading the {{downloadFlag}} for you ...</span>
+
+                <ng-container *ngIf="heatmapMagicFlag !==-1">
+                    <div *ngIf="!insights.noDataFoundHeatlist && !insights.loading" style="padding-bottom: 1.2rem;" [ngClass]="{'overlay-disabled': heatmapMagicFlag==0}">
+                        <img src="assets/icons/bot.jpg" (click)="openMagicBox()" style="border-radius: 50%; float: left; width: 40px; cursor: pointer;">
+                        <button class="headerZoom" mat-button style="font-size: 13px; color: #5097da; font-weight: bold; margin-left: -0.5rem;" (click)="openMagicBox()">
+                            Let me do the magic for you <img src="assets/icons/ai-icon-golden.png" style="width: 18px; margin-left: 0.1rem; vertical-align: baseline;">
+                        </button>
+                        <span style="color: red; font-size: 10px; margin-right: 1.3em; margin-left: -14px; vertical-align: text-bottom;">Beta</span>
+                    </div>
+                </ng-container>
+
+                <div style="padding-bottom: 1.2rem;">
+                    <button class="headerZoom" mat-button style="font-size: 13px; color: #5097da; font-weight: bold;" (click)="setTableValue()" [matTooltip]="viewValue ? 'Click to view Average Ratings' : 'Click to view Heatmap by Engaged%'" matTooltipPosition="above">
+                        {{engagementBtnText}}
+                    </button>
+                </div>
+
+                <div style="padding-bottom: 1.2rem;">
+                    <button #button mat-button [matMenuTriggerFor]="appMenu" #appMenuTrigger="matMenuTrigger" (mouseenter)="buttonEnter(appMenuTrigger)" (mouseleave)="buttonLeave(appMenuTrigger,button)" style="z-index:1050">
+                        <span style="font-weight: bold;font-size: 13px;color: #5097da;display: inline-block;">
+                            Download
+                        </span>
+                    </button>
+                    <mat-menu #appMenu="matMenu" [hasBackdrop]="false">
+                        <div (mouseenter)="menuEnter()" (mouseleave)="menuLeave(appMenuTrigger, button)">
+                            <button mat-menu-item style="font-size: 13px;" (click)="downloadMediaOpt('image')">Download As Image</button>
+                            <button mat-menu-item style="font-size: 13px;" (click)="downloadMediaOpt('PDF')">Download As Pdf</button>
+                            <button mat-menu-item style="font-size: 13px;" (click)="downloadExcel()">Download As Excel</button>
+                        </div>
+                    </mat-menu>
+                </div>
+            </div>
+        </div>
+        <mat-menu #Respondent="matMenu" class="mat-elevation-z8">
+            <button style="font-size: 13px;" class="mmenu" mat-menu-item (click)="openRespondentMenu('greater')" [ngStyle]="{'background': insights.respondentFilter['flag'] == '1' && insights.respondentFilter['type'] == 'greater' ? '#e0e0e0':''}">Greater than or equal to (≥)</button>
+            <button style="font-size: 13px;" class="mmenu" mat-menu-item (click)="openRespondentMenu('lesser')" [ngStyle]="{'background': insights.respondentFilter['flag'] == '1' && insights.respondentFilter['type'] == 'lesser' ? '#e0e0e0':''}">Lesser than or equal to (≤)</button>
+            <button *ngIf="insights.respondentFilter['flag'] == '1'" style="font-size: 13px; color: #ff4d4d;" class="mmenu" mat-menu-item (click)="changeRespondentFilterFlag()">Remove Filter (<mat-icon class="cancel-icon">close</mat-icon>)</button>
+        </mat-menu>
+
+    </div>
+    <div class='nu-table-body' style="position: relative;">
+        <div style="display: flex;width: calc(300vw - 60px);">
+            <div class="tableFactors" id="tableFactors" [ngClass]="{'leftSlide':factorSelected!='' || insights.typeHeatlist!='factors'}" style="width: 33.33% !important;">
+                <!-- <table id="table1" mat-table [dataSource]="insights.heatlist" class="w-100" style="width: 100% !important;"> -->
+                <table id="table1" mat-table matSort (matSortChange)="sortData($event,insights.dummytable1DataSource,'factor')" [dataSource]="insights.table1DataSource" class="w-100" style="width: 100% !important;">
+                    <ng-container matColumnDef="head">
+                        <th mat-header-cell *matHeaderCellDef [attr.colspan]="insights.displayedColumns.length">  
+                            <div style="text-align: center;">
+                                Heat Map by 
+                                <span style="font-weight: bold;">
+                                    "{{insights.selectedFilter}}"
+                                </span>
+                                for
+                                <span style="font-weight: bold;">
+                                    "{{cap1}}  <span *ngIf="cap2">Vs {{cap2}}</span>" 
+                                </span>
+                            </div> 
+                            <div *ngIf="!downloadMedia" style="text-align: left;">
+                                <div class="d-flex" style="justify-content: space-between;align-items: center; margin-top: -35px; margin-bottom: -6px; margin-left: -2px;">
+                                    <div class="mt-1" style="width: 500%;" *ngIf="factorSelected || subfactorSelected">
+                                        <button mat-button class="headerZoom" style="font-size: 13px;" (click)="backToFactors()"
+                                            *ngIf="factorSelected"
+                                            matTooltip="click here to view Heat Map by factors" matTooltipPosition="above">
+                                            Factors
+                                        </button>
+                                        <button mat-button class="headerZoom" style="font-size: 13px;" (click)="backToSubfactor()"
+                                            *ngIf="!factorSelected && subfactorSelected"
+                                            matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                            Drivers
+                                        </button>
+                                        <span style="font-weight: bold;" *ngIf="factorSelected && !subfactorSelected">
+                                            >
+                                            <span style="font-size: 13px;color: #5097da;margin-left: 10px;">
+                                                {{factorSelected}}
+                                            </span>
+                                        </span>
+                                        <span style="font-weight: bold;" *ngIf="subfactorSelected">
+                                            >
+                        
+                                            <button *ngIf="factorSelected" mat-button class="headerZoom" style="font-size: 13px;" (click)="backToSubfactor()" matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                            {{ factorSelected }}
+                                            </button>
+                                            >
+                                            <span style="font-size: 13px;color: #5097da;margin-left: 10px;">
+                                                {{subfactorSelected}}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="mt-1" style="width: 500%;" *ngIf="!factorSelected && !subfactorSelected">
+                                        <span style="font-size: 13px; text-transform: capitalize; color: #5097da; font-weight: bold;">
+                                            {{showTableSelected}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                    </ng-container>
+                    <ng-container matColumnDef="Function">
+                        <th mat-header-cell *matHeaderCellDef setPosition="sticky" > {{insights.selectedFilter}} </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;color: black;font-weight: bold;"> {{element.index}} </td>
+                    </ng-container>
+                    <ng-container *ngFor="let item of insights.headers"  [matColumnDef]="item">
+                        <ng-container *ngIf="item == 'Total Score'">
+                            <th mat-header-cell *matHeaderCellDef  mat-sort-header>Total Score</th>
+                        </ng-container>
+                        <ng-container *ngIf="item == 'Total Respondents'">
+                            <th mat-header-cell *matHeaderCellDef>Total Respondents <mat-icon [matMenuTriggerFor]="Respondent" matTooltip="Add Filter" matTooltipPosition="above" class="respondent-filter">filter_list</mat-icon></th>
+                        </ng-container>
+                        <ng-container>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> 
+                                <button mat-button class="headerZoom" (click)="factorSelected=item;insights.getHeatList('drivers',item,'')"
+                                *ngIf="item != 'Total Score' && item != 'Total Respondents'" matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                    <span>{{item}} </span>
+                                </button>
+                            </th>
+                        </ng-container>
+                        <!-- <th mat-header-cell *matHeaderCellDef > 
+                            <button mat-button class="headerZoom" (click)="factorSelected=item;insights.getHeatList('drivers',item,'')"
+                            *ngIf="item != 'Total Score' && item != 'Total Respondents'" matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                {{item}} 
+                            </button>
+                            <span *ngIf="item == 'Total Score'">
+                                {{item}} 
+                            </span>
+                            <span *ngIf="item == 'Total Respondents'">
+                              {{item}} <mat-icon [matMenuTriggerFor]="Respondent" matTooltip="Add Filter" matTooltipPosition="above" class="respondent-filter">filter_list</mat-icon>
+                            </span>
+                        </th> -->
+                        <td mat-cell *matCellDef="let element" [matTooltip]="getTooltipData(item, element[item])" matTooltipPosition="above"
+                        style="padding: 0px; border-bottom: black; border-right: black;" [style.background]="setCellColor(element[item])"> 
+                            <div class="popover__wrapper">
+                                <a>
+                                    <div style="display: flex;justify-content: center;align-items: center;">
+                                        <div style="border-radius: 50%;padding: 7.5 px;font-weight: bold;
+                                        height: 36px;width: 100px;display: flex;justify-content: center;align-items: center;" 
+                                        [ngClass]="{'ishightlight': (viewPercentage && element[item].is_highlighted) || (viewValue && element[item].is_highlighted_per)}">
+                                            <div style="width: 28.28px;font-weight: 600;">
+                                                <ng-container *ngIf="viewPercentage">
+                                                    <span *ngIf="element[item]?.value && element[item]?.value!='-'">
+                                                        {{(element[item]?.value) | number: '1.0-2'}} 
+                                                    </span>
+                                                </ng-container>
+                                                <ng-container *ngIf="viewValue">
+                                                    <span *ngIf="element[item]['percentage_value'] && element[item]['percentage_value']!='-'"><span *ngIf="item != 'Total Respondents'">{{(element[item]['percentage_value'])}}<span *ngIf="element[item]['percentage_value'] != '-'">%</span></span> <span *ngIf="item == 'Total Respondents'">{{(element[item]['percentage_value'])}}</span></span>
+                                                    <span *ngIf="element[item]['percentage_value'] && element[item]['percentage_value']=='-' && element[item]?.total > 0">0%</span>
+                                                </ng-container>
+
+                                            </div>
+                                            <ng-container *ngIf="viewPercentage">
+                                                <div style="margin-left: 15px; font-size:11px;line-height: 11px;font-weight: normal;color: black;" *ngIf="element[item]?.value_benchmark != 0.0">
+                                                    <span *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'">
+                                                        {{
+                                                            ((element[item]?.value_benchmark<0)
+                                                            ?(-element[item]?.value_benchmark):element[item]?.value_benchmark) | number: '1.0-2'
+                                                        }} 
+                                                    </span>   
+                                                    <ng-container *ngIf="!showDownloadingMsg">
+                                                    <img style="width: 10px; height:10px;" *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'" [src]=
+                                                    "( element[item]?.value_benchmark<0)
+                                                    ?'assets/icons/down-arrow.png'
+                                                    :'assets/icons/up-arrow.png'">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="showDownloadingMsg">
+                                                        <span *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'"><span *ngIf="(element[item]?.value_benchmark<0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8595;</span><span *ngIf="(element[item]?.value_benchmark>0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8593;</span></span>
+                                                    </ng-container>
+                                                </div>
+                                                <div style="width: 37px;" *ngIf="!(element[item]?.value_benchmark != 0.0)"></div>
+
+                                            </ng-container>
+                                            <ng-container *ngIf="viewValue">
+                                                <div style="margin-left: 15px; font-size:11px;line-height: 11px;font-weight: normal;color: black;" *ngIf="element[item]['percentage_benchmark'] != 0.0">
+                                                    <span *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark'] !='-'">
+                                                        {{
+                                                            ((element[item]['percentage_benchmark']<0)
+                                                            ?(-element[item]['percentage_benchmark']):element[item]['percentage_benchmark']) | number: '1.0-2'
+                                                        }}
+                                                    </span>
+                                                    <ng-container *ngIf="!showDownloadingMsg">
+                                                    <img style="width: 10px; height:10px;" *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark']!='-'" [src]=
+                                                    "( element[item]['percentage_benchmark']<0)
+                                                    ?'assets/icons/down-arrow.png'
+                                                    :'assets/icons/up-arrow.png'">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="showDownloadingMsg">
+                                                        <span *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark']!='-'"><span *ngIf="(element[item]['percentage_benchmark']<0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8595;</span><span *ngIf="(element[item]['percentage_benchmark']>0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8593;</span></span>
+                                                    </ng-container>
+                                                </div>
+                                                <div style="width: 37px;" *ngIf="!(element[item]['percentage_benchmark'] != 0.0)"></div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </a>
+                                <!-- <div class="popover__content" data-boundary="viewport">
+                                  <p class="popover__message">Joseph Francis "Joey" Tribbiani, Jr.</p>
+                                </div> -->
+                              </div>
+                        </td>
+                    </ng-container>
+                    <!-- <ng-container matColumnDef="legends">
+                        <td mat-footer-cell *matFooterCellDef [attr.colspan]="insights.displayedColumns.length">
+                            <div *ngIf="insights.heatlist.length === 0" style="text-align: center;font-size: 20px;font-weight: 600;">
+                                No Data Found for this intervention on entered range.
+                            </div>
+                            <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+                                <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                                    <span style="margin-left: 10px;">{{item.label}}</span>
+                                </div>
+                                <div  style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                                    <span style="margin-left: 10px;">No response</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container> -->
+                    <ng-container matColumnDef="legends">
+                        <td mat-footer-cell *matFooterCellDef [attr.colspan]="insights.displayedColumns.length">
+                            <div *ngIf="insights.noDataFoundHeatlist" style="text-align: center;font-size: 20px;font-weight: 600;">
+                                No Data Found for this intervention on entered range.
+                            </div>
+                            <div style="height:40px"></div>
+                            <div style="display:flex; justify-content:center;" *ngIf="insights.hightlightCellRuleSelected == 'colorscale'">
+                                <table class="legend">
+                                    <tr>
+                                        <th *ngFor="let color of insights.selectedColorscale" [style.background-color]="color"></th>
+                                        <!-- <th style="background-color:royalblue"></th>
+                                        <th style="background-color:#4949ff"></th> -->
+                                        <!-- <th style="background-color:#9292ff"></th>
+                                        <th style="background-color:#dbdbff"></th>
+                                        <th style="background-color:#ffdbdb"></th>
+                                        <th style="background-color:#ff9292"></th>
+                                        <th style="background-color:#ff4949"></th> -->
+                                        <!-- <th style="background-color:#ff0000"></th> -->
+                                    </tr>
+                                    <tr>
+                                        <td>Working Well</td>
+                                        <td [attr.colspan]="insights.selectedColorscale.length - 2">
+                                            <span style="display: flex; justify-content: center; margin-top: 10px;"><div class="arrow">
+                                                <div class="line"></div>
+                                                <div class="point"></div>
+                                            </div></span>
+                                        </td>
+                                        <td>Requires Improvement</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="display: flex;align-items: center;justify-content: center;padding: 20px;" *ngIf="insights.hightlightCellRuleSelected !== 'colorscale'">
+                                <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                                    <span style="margin-left: 10px;">{{item.label}}</span>
+                                </div>
+                                <div  style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                                    <span style="margin-left: 10px;">No response</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['head']"></tr>
+                    <tr mat-header-row *matHeaderRowDef="insights.displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: insights.displayedColumns;"></tr>
+                    <tr mat-footer-row *matFooterRowDef="['legends']"  [attr.rowspan]="columns_length" ></tr>
+                </table>
+                <!-- <div *ngIf="insights.heatlist.length === 0" style="text-align: center;font-size: 20px;font-weight: 600;">
+                    No Data Found for this intervention on entered range.
+                </div> -->
+                <!-- <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+                    <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                        <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                        <span style="margin-left: 10px;">{{item.label}}</span>
+                    </div>
+                    <div  style="display: flex;align-items: center;">
+                        <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                        <span style="margin-left: 10px;">No response</span>
+                    </div>
+                </div> -->
+            </div>
+    
+            <div class="driverFactors" id="driverFactors" [ngClass]="{'rightSlide':factorSelected!='' || insights.typeHeatlist!='factors', 'leftSlide':subfactorSelected!='' || (insights.typeHeatlist!='drivers' && insights.typeHeatlist!='factors')}" style="width: 33.33% !important;">
+                <!-- <div style="display: flex;justify-content: center;">
+                    <img src="https://t3.ftcdn.net/jpg/02/86/46/28/360_F_286462873_fHM4IjTAnMRtSnTT7JApNr7KlvYlrfdN.jpg" style="max-height: 300px;height: 100%;" *ngIf="factorSelected"/>
+                </div> -->
+                <!-- <table id="table2" mat-table [dataSource]="insights.driverheatlist" class="w-100" style="width: 100% !important;"> -->
+                <table id="table2" mat-table matSort (matSortChange)="sortData($event,insights.dummytable2DataSource,'driver')" [dataSource]="insights.table2DataSource" class="w-100" style="width: 100% !important;">
+                    <ng-container matColumnDef="head" >
+                        <th mat-header-cell *matHeaderCellDef [attr.colspan]="insights.driverdisplayedColumns.length">  
+                            <div style="text-align: center;">
+                                Heat Map by 
+                                <span style="font-weight: bold;">
+                                    "{{insights.selectedFilter}}"
+                                </span>
+                                for
+                                <span style="font-weight: bold;">
+                                    "{{cap1}} <span *ngIf="cap2">Vs {{cap2}}</span>" 
+                                </span>
+                            </div> 
+                            <div *ngIf="!downloadMedia" style="text-align: left;">
+                                <div class="d-flex" style="justify-content: space-between;align-items: center; margin-top: -35px; margin-bottom: -6px; margin-left: -2px;">
+                                    <div class="mt-1" style="width: 500%;" *ngIf="factorSelected || subfactorSelected">
+                                        <button mat-button class="headerZoom" style="font-size: 13px;" (click)="backToFactors()"
+                                            *ngIf="factorSelected"
+                                            matTooltip="click here to view Heat Map by factors" matTooltipPosition="above">
+                                            Factors
+                                        </button>
+                                        <button mat-button class="headerZoom" style="font-size: 13px;" (click)="backToSubfactor()"
+                                            *ngIf="!factorSelected && subfactorSelected"
+                                            matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                            Drivers
+                                        </button>
+                                        <span style="font-weight: bold;" *ngIf="factorSelected && !subfactorSelected">
+                                            >
+                                            <span style="font-size: 13px;color: #5097da;margin-left: 10px;">
+                                                {{factorSelected}}
+                                            </span>
+                                        </span>
+                                        <span style="font-weight: bold;" *ngIf="subfactorSelected">
+                                            >
+                        
+                                            <button *ngIf="factorSelected" mat-button class="headerZoom" style="font-size: 13px;" (click)="backToSubfactor()" matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                            {{ factorSelected }}
+                                            </button>
+                                            >
+                                            <span style="font-size: 13px;color: #5097da;margin-left: 10px;">
+                                                {{subfactorSelected}}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="mt-1" style="width: 500%;" *ngIf="!factorSelected && !subfactorSelected">
+                                        <span style="font-size: 13px; text-transform: capitalize; color: #5097da; font-weight: bold;">
+                                            {{showTableSelected}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                    </ng-container>
+                    <ng-container matColumnDef="Function">
+                        <th mat-header-cell *matHeaderCellDef setPosition="sticky" > {{insights.selectedFilter}} </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;color: black;font-weight: bold;"> {{element.index}} </td>
+                    </ng-container>
+                    <ng-container *ngFor="let item of insights.driverHeader"  [matColumnDef]="item">
+                        <!-- <th mat-header-cell *matHeaderCellDef setPosition="sticky"> 
+                            <button mat-button class="headerZoom" (click)="subfactorSelected=item;insights.getHeatList('questions',factorSelected,item)" matTooltip="click here to view Heat Map by driver's Question" matTooltipPosition="above" 
+                            *ngIf="item != 'Total Score' && item != 'Total Respondents'">
+                                {{item}} 
+                            </button>
+                            <span *ngIf="item == 'Total Score'">
+                                {{item}} 
+                            </span>
+                            <span *ngIf="item == 'Total Respondents'">
+                                {{item}} <mat-icon [matMenuTriggerFor]="Respondent" matTooltip="Add Filter" matTooltipPosition="above" class="respondent-filter">filter_list</mat-icon>
+                            </span>
+                        </th> -->
+                        <ng-container *ngIf="item == 'Total Score'">
+                            <th mat-header-cell *matHeaderCellDef  mat-sort-header>Total Score</th>
+                        </ng-container>
+                        <ng-container *ngIf="item == 'Total Respondents'">
+                            <th mat-header-cell *matHeaderCellDef>Total Respondents <mat-icon [matMenuTriggerFor]="Respondent" matTooltip="Add Filter" matTooltipPosition="above" class="respondent-filter">filter_list</mat-icon></th>
+                        </ng-container>
+                        <ng-container>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> 
+                                <button mat-button class="headerZoom" (click)="subfactorSelected=item;insights.getHeatList('questions',factorSelected,item)" matTooltip="click here to view Heat Map by driver's Question" matTooltipPosition="above"
+                                *ngIf="item != 'Total Score' && item != 'Total Respondents'">
+                                    <span>{{item}} </span>
+                                </button>
+                            </th>
+                        </ng-container>
+                        <td mat-cell *matCellDef="let element" style="padding: 0px; border-bottom: black; border-right: black;" [style.background]="setCellColor(element[item])" [matTooltip]="getTooltipData(item,element[item])" matTooltipPosition="above"> 
+                            <!-- <div class="popover__wrapper">
+                                <a> -->
+                                    <div style="display: flex;justify-content: center;align-items: center;">
+                                        <div style="border-radius: 50%;padding: 7.5 px;font-weight: bold;
+                                        height: 36px;width: 100px;display: flex;justify-content: center;align-items: center;" 
+                                        [ngClass]="{'ishightlight': (viewPercentage && element[item].is_highlighted) || (viewValue && element[item].is_highlighted_per)}">
+                                            <div style="width: 28.28px;font-weight: 600;">
+                                                <ng-container *ngIf="viewPercentage">
+                                                    <span *ngIf="element[item]?.value && element[item]?.value!='-'">
+                                                        {{(element[item]?.value) | number: '1.0-2'}} 
+                                                    </span>
+                                                </ng-container>
+                                                <ng-container *ngIf="viewValue">
+                                                    <span *ngIf="element[item]['percentage_value'] && element[item]['percentage_value']!='-'"><span *ngIf="item != 'Total Respondents'">{{(element[item]['percentage_value'])}}<span *ngIf="element[item]['percentage_value'] != '-'">%</span></span> <span *ngIf="item == 'Total Respondents'">{{(element[item]['percentage_value'])}}</span></span>
+                                                    <span *ngIf="element[item]['percentage_value'] && element[item]['percentage_value']=='-' && element[item]?.total > 0">0%</span>
+                                                </ng-container>
+                                            </div>
+                                            <ng-container *ngIf="viewPercentage">
+                                                <div style="margin-left: 15px; font-size:11px;line-height: 11px;font-weight: normal;color: black;" *ngIf="element[item]?.value_benchmark != 0.0">
+                                                    <span *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'">
+                                                        {{
+                                                            ((element[item]?.value_benchmark<0)
+                                                            ?(-element[item]?.value_benchmark):element[item]?.value_benchmark) | number: '1.0-2'
+                                                        }} 
+                                                    </span>   
+                                                    <ng-container *ngIf="!showDownloadingMsg">
+                                                    <img style="width: 10px; height:10px;" *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'" [src]=
+                                                    "( element[item]?.value_benchmark<0)
+                                                    ?'assets/icons/down-arrow.png'
+                                                    :'assets/icons/up-arrow.png'">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="showDownloadingMsg">
+                                                        <span *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'"><span *ngIf="(element[item]?.value_benchmark<0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8595;</span><span *ngIf="(element[item]?.value_benchmark>0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8593;</span></span>
+                                                    </ng-container>
+                                                </div>
+                                                <div style="width: 37px;" *ngIf="!(element[item]?.value_benchmark != 0.0)"></div>
+
+                                            </ng-container>
+                                            <ng-container *ngIf="viewValue">
+                                                <div style="margin-left: 15px; font-size:11px;line-height: 11px;font-weight: normal;color: black;" *ngIf="element[item]['percentage_benchmark'] != 0.0">
+                                                    <span *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark'] !='-'">
+                                                        {{
+                                                            ((element[item]['percentage_benchmark']<0)
+                                                            ?(-element[item]['percentage_benchmark']):element[item]['percentage_benchmark']) | number: '1.0-2'
+                                                        }}
+                                                    </span>
+                                                    <ng-container *ngIf="!showDownloadingMsg">
+                                                    <img style="width: 10px; height:10px;" *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark']!='-'" [src]=
+                                                    "( element[item]['percentage_benchmark']<0)
+                                                    ?'assets/icons/down-arrow.png'
+                                                    :'assets/icons/up-arrow.png'">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="showDownloadingMsg">
+                                                        <span *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark']!='-'"><span *ngIf="(element[item]['percentage_benchmark']<0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8595;</span><span *ngIf="(element[item]['percentage_benchmark']>0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8593;</span></span>
+                                                    </ng-container>
+                                                </div>
+                                                <div style="width: 37px;" *ngIf="!(element[item]['percentage_benchmark'] != 0.0)"></div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                <!-- </a>
+                              </div> -->
+                        </td>
+                    </ng-container>
+                    <!-- <ng-container matColumnDef="legends">
+                        <td mat-footer-cell *matFooterCellDef [attr.colspan]="insights.driverdisplayedColumns.length">
+                            <div *ngIf="insights.driverheatlist.length === 0" style="text-align: center;font-size: 20px;font-weight: 600;">
+                                No Data Found for this Driver for entered range
+                            </div>
+                            <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+                                <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                                    <span style="margin-left: 10px;">{{item.label}}</span>
+                                </div>
+                                <div  style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                                    <span style="margin-left: 10px;">No response</span>
+                                </div>
+                            </div>
+                        </td>    
+                    </ng-container> -->
+                    <ng-container matColumnDef="legends">
+                        <td mat-footer-cell *matFooterCellDef [attr.colspan]="insights.driverdisplayedColumns.length">
+                            <div *ngIf="insights.noDataFoundDriverHeatlist" style="text-align: center;font-size: 20px;font-weight: 600;">
+                                No Data Found for this Driver for entered range
+                            </div>
+
+                            <div style="height:40px"></div>
+                            <div style="display:flex; justify-content:center;"  *ngIf="insights.hightlightCellRuleSelected == 'colorscale'">
+                                <table class="legend">
+                                    <tr>
+                                        <th *ngFor="let color of insights.selectedColorscale" [style.background-color]="color"></th>
+                                        <!-- <th style="background-color:royalblue"></th>
+                                        <th style="background-color:#4949ff"></th> -->
+                                        <!-- <th style="background-color:#9292ff"></th>
+                                        <th style="background-color:#dbdbff"></th>
+                                        <th style="background-color:#ffdbdb"></th>
+                                        <th style="background-color:#ff9292"></th>
+                                        <th style="background-color:#ff4949"></th> -->
+                                        <!-- <th style="background-color:#ff0000"></th> -->
+                                    </tr>
+                                    <tr>
+                                        <td>Working Well</td>
+                                        <td [attr.colspan]="insights.selectedColorscale.length - 2">
+                                            <span style="display: flex; justify-content: center; margin-top: 10px;"><div class="arrow">
+                                                <div class="line"></div>
+                                                <div class="point"></div>
+                                            </div></span>
+                                        </td>
+                                        <td>Requires Improvement</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="display: flex;align-items: center;justify-content: center;padding: 20px;" *ngIf="insights.hightlightCellRuleSelected !== 'colorscale'">
+                                <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                                    <span style="margin-left: 10px;">{{item.label}}</span>
+                                </div>
+                                <div  style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                                    <span style="margin-left: 10px;">No response</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['head']"></tr>
+                    <tr mat-header-row *matHeaderRowDef="insights.driverdisplayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: insights.driverdisplayedColumns;"></tr>
+                    <tr mat-footer-row *matFooterRowDef="['legends']"  [attr.rowspan]="columns_length" ></tr>
+                </table>
+                <!-- <div *ngIf="insights.driverheatlist.length === 0" style="text-align: center;font-size: 20px;font-weight: 600;">
+                    No Data Found for this Driver for entered range
+                </div> -->
+                <!-- <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+                    <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                        <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                        <span style="margin-left: 10px;">{{item.label}}</span>
+                    </div>
+                    <div  style="display: flex;align-items: center;">
+                        <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                        <span style="margin-left: 10px;">No response</span>
+                    </div>
+                </div> -->
+            </div>
+
+            <div  class="driverQuestions" id="driverQuestions" [ngClass]="{'rightSlide':subfactorSelected!='' || insights.typeHeatlist=='questions'}" style="width: 33.33% !important;">
+                <!-- <table id="table3" mat-table [dataSource]="insights.driverQuestionsheatlist" class="w-100" style="width: 100% !important;"> -->
+                    <table id="table3" mat-table mat-table matSort (matSortChange)="sortData($event,insights.dummytable3DataSource,'question')" [dataSource]="insights.table3DataSource" class="w-100" style="width: 100% !important;">
+                    <ng-container matColumnDef="head" >
+                        <th mat-header-cell *matHeaderCellDef [attr.colspan]="insights.driverQuestionsdisplayedColumns.length">  
+                            <div style="text-align: center;">
+                                Heat Map by 
+                                <span style="font-weight: bold;">
+                                    "{{insights.selectedFilter}}"
+                                </span>
+                                for
+                                <span style="font-weight: bold;">
+                                    "{{cap1}} <span *ngIf="cap2">Vs {{cap2}}</span>" 
+                                </span>
+                            </div>
+                            <div *ngIf="!downloadMedia" style="text-align: left;">
+                                <div class="d-flex" style="justify-content: space-between;align-items: center; margin-top: -35px; margin-bottom: -6px;  margin-left: -2px;">
+                                    <div class="mt-1" style="width: 500%;" *ngIf="factorSelected || subfactorSelected">
+                                        <button mat-button class="headerZoom" style="font-size: 13px;" (click)="backToFactors()"
+                                            *ngIf="factorSelected"
+                                            matTooltip="click here to view Heat Map by factors" matTooltipPosition="above">
+                                            Factors
+                                        </button>
+                                        <button mat-button class="headerZoom" style="font-size: 13px;" (click)="backToSubfactor()"
+                                            *ngIf="!factorSelected && subfactorSelected"
+                                            matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                            Drivers
+                                        </button>
+                                        <span style="font-weight: bold;" *ngIf="factorSelected && !subfactorSelected">
+                                            >
+                                            <span style="font-size: 13px;color: #5097da;margin-left: 10px;">
+                                                {{factorSelected}}
+                                            </span>
+                                        </span>
+                                        <span style="font-weight: bold;" *ngIf="subfactorSelected">
+                                            >
+                        
+                                            <button *ngIf="factorSelected" mat-button class="headerZoom" style="font-size: 13px;" (click)="backToSubfactor()" matTooltip="click here to view Heat Map by drivers" matTooltipPosition="above">
+                                            {{ factorSelected }}
+                                            </button>
+                                            >
+                                            <span style="font-size: 13px;color: #5097da;margin-left: 10px;">
+                                                {{subfactorSelected}}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="mt-1" style="width: 500%;" *ngIf="!factorSelected && !subfactorSelected">
+                                        <span style="font-size: 13px; text-transform: capitalize; color: #5097da; font-weight: bold;">
+                                            {{showTableSelected}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div> 
+                        </th>
+                    </ng-container>
+                    <ng-container matColumnDef="Function">
+                        <th mat-header-cell *matHeaderCellDef setPosition="sticky" > {{insights.selectedFilter}} </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;color: black;font-weight: bold;"> {{element.index}} </td>
+                    </ng-container>
+                    <ng-container *ngFor="let item of insights.driverQuestionsHeader"  [matColumnDef]="item">
+                        <!-- <th mat-header-cell *matHeaderCellDef setPosition="sticky"> 
+                                {{item}} <ng-container *ngIf="item == 'Total Respondents'"><mat-icon [matMenuTriggerFor]="Respondent" matTooltip="Add Filter" matTooltipPosition="above" class="respondent-filter">filter_list</mat-icon></ng-container>
+                        </th> -->
+                        <ng-container *ngIf="item == 'Total Score'">
+                            <th mat-header-cell *matHeaderCellDef  mat-sort-header>Total Score</th>
+                        </ng-container>
+                        <ng-container *ngIf="item == 'Total Respondents'">
+                            <th mat-header-cell *matHeaderCellDef>Total Respondents <mat-icon [matMenuTriggerFor]="Respondent" matTooltip="Add Filter" matTooltipPosition="above" class="respondent-filter">filter_list</mat-icon></th>
+                        </ng-container>
+                        <ng-container>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> 
+                                {{item}}
+                            </th>
+                        </ng-container>
+                        <td mat-cell *matCellDef="let element" style="padding: 0px; border-bottom: black; border-right: black;" [style.background]="setCellColor(element[item])" [matTooltip]="getTooltipData(item,element[item])" matTooltipPosition="above"> 
+                            <!-- <div class="popover__wrapper">
+                                <a> -->
+                                    <div style="display: flex;justify-content: center;align-items: center;">
+                                        <div style="border-radius: 50%;padding: 7.5 px;font-weight: bold;
+                                        height: 36px;width: 100px;display: flex;justify-content: center;align-items: center;" 
+                                        [ngClass]="{'ishightlight': (viewPercentage && element[item].is_highlighted) || (viewValue && element[item].is_highlighted_per)}">
+                                            <div style="width: 28.28px;font-weight: 600;">
+                                                <ng-container *ngIf="viewPercentage">
+                                                    <span *ngIf="element[item]?.value && element[item]?.value!='-'">
+                                                        {{(element[item]?.value) | number: '1.0-2'}} 
+                                                    </span>
+                                                </ng-container>
+                                                <ng-container *ngIf="viewValue">
+                                                    <span *ngIf="element[item]['percentage_value'] && element[item]['percentage_value']!='-'"><span *ngIf="item != 'Total Respondents'">{{(element[item]['percentage_value'])}}<span *ngIf="element[item]['percentage_value'] != '-'">%</span></span> <span *ngIf="item == 'Total Respondents'">{{(element[item]['percentage_value'])}}</span></span>
+                                                    <span *ngIf="element[item]['percentage_value'] && element[item]['percentage_value']=='-' && element[item]?.total > 0">0%</span>
+                                                </ng-container>
+                                            </div>
+                                            <ng-container *ngIf="viewPercentage">
+                                                <div style="margin-left: 15px; font-size:11px;line-height: 11px;font-weight: normal;color: black;" *ngIf="element[item]?.value_benchmark != 0.0">
+                                                    <span *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'">
+                                                        {{
+                                                            ((element[item]?.value_benchmark<0)
+                                                            ?(-element[item]?.value_benchmark):element[item]?.value_benchmark) | number: '1.0-2'
+                                                        }} 
+                                                    </span>   
+                                                    <ng-container *ngIf="!showDownloadingMsg">
+                                                    <img style="width: 10px; height:10px;" *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'" [src]=
+                                                    "( element[item]?.value_benchmark<0)
+                                                    ?'assets/icons/down-arrow.png'
+                                                    :'assets/icons/up-arrow.png'">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="showDownloadingMsg">
+                                                        <span *ngIf="element[item]?.value_benchmark  && element[item]?.value_benchmark!='-'"><span *ngIf="(element[item]?.value_benchmark<0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8595;</span><span *ngIf="(element[item]?.value_benchmark>0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8593;</span></span>
+                                                    </ng-container>
+                                                </div>
+                                                <div style="width: 37px;" *ngIf="!(element[item]?.value_benchmark != 0.0)"></div>
+
+                                            </ng-container>
+                                            <ng-container *ngIf="viewValue">
+                                                <div style="margin-left: 15px; font-size:11px;line-height: 11px;font-weight: normal;color: black;" *ngIf="element[item]['percentage_benchmark'] != 0.0">
+                                                    <span *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark'] !='-'">
+                                                        {{
+                                                            ((element[item]['percentage_benchmark']<0)
+                                                            ?(-element[item]['percentage_benchmark']):element[item]['percentage_benchmark']) | number: '1.0-2'
+                                                        }}
+                                                    </span>
+                                                    <ng-container *ngIf="!showDownloadingMsg">
+                                                    <img style="width: 10px; height:10px;" *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark']!='-'" [src]=
+                                                    "( element[item]['percentage_benchmark']<0)
+                                                    ?'assets/icons/down-arrow.png'
+                                                    :'assets/icons/up-arrow.png'">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="showDownloadingMsg">
+                                                        <span *ngIf="element[item]['percentage_benchmark']  && element[item]['percentage_benchmark']!='-'"><span *ngIf="(element[item]['percentage_benchmark']<0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8595;</span><span *ngIf="(element[item]['percentage_benchmark']>0)" [style.font-size.px]="10" [style.font-weight]="'bold'">&#8593;</span></span>
+                                                    </ng-container>
+                                                </div>
+                                                <div style="width: 37px;" *ngIf="!(element[item]['percentage_benchmark'] != 0.0)"></div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                <!-- </a>
+                              </div> -->
+                        </td>
+                    </ng-container>
+                    <!-- <ng-container matColumnDef="legends">
+                        <td mat-footer-cell *matFooterCellDef [attr.colspan]="insights.driverQuestionsdisplayedColumns.length">
+                            <div *ngIf="insights.driverheatlist.length === 0" style="text-align: center;font-size: 20px;font-weight: 600;">
+                                No Data Found for this Driver for entered range
+                            </div>
+                            <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+                                <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                                    <span style="margin-left: 10px;">{{item.label}}</span>
+                                </div>
+                                <div  style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                                    <span style="margin-left: 10px;">No response</span>
+                                </div>
+                            </div>
+                        </td>    
+                    </ng-container> -->
+                    <ng-container matColumnDef="legends">
+                        <td mat-footer-cell *matFooterCellDef [attr.colspan]="insights.driverQuestionsdisplayedColumns.length">
+                            <div *ngIf="insights.noDataFoundQuestionHeatlist" style="text-align: center;font-size: 20px;font-weight: 600;">
+                                No Data Found for this Driver for entered range
+                            </div>
+
+                            <div style="height:40px"></div>
+                            <div style="display:flex; justify-content:center;" *ngIf="insights.hightlightCellRuleSelected == 'colorscale'">
+                                <table class="legend">
+                                    <tr>
+                                        <th *ngFor="let color of insights.selectedColorscale" [style.background-color]="color"></th>
+                                        <!-- <th style="background-color:royalblue"></th>
+                                        <th style="background-color:#4949ff"></th> -->
+                                        <!-- <th style="background-color:#9292ff"></th>
+                                        <th style="background-color:#dbdbff"></th>
+                                        <th style="background-color:#ffdbdb"></th>
+                                        <th style="background-color:#ff9292"></th>
+                                        <th style="background-color:#ff4949"></th> -->
+                                        <!-- <th style="background-color:#ff0000"></th> -->
+                                    </tr>
+                                    <tr>
+                                        <td>Working Well</td>
+                                        <td [attr.colspan]="insights.selectedColorscale.length - 2">
+                                            <span style="display: flex; justify-content: center; margin-top: 10px;"><div class="arrow">
+                                                <div class="line"></div>
+                                                <div class="point"></div>
+                                            </div></span>
+                                        </td>
+                                        <td>Requires Improvement</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="display: flex;align-items: center;justify-content: center;padding: 20px;" *ngIf="insights.hightlightCellRuleSelected !== 'colorscale'">
+                                <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                                    <span style="margin-left: 10px;">{{item.label}}</span>
+                                </div>
+                                <div  style="display: flex;align-items: center;">
+                                    <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                                    <span style="margin-left: 10px;">No response</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['head']"></tr>
+                    <tr mat-header-row *matHeaderRowDef="insights.driverQuestionsdisplayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: insights.driverQuestionsdisplayedColumns;"></tr>
+                    <tr mat-footer-row *matFooterRowDef="['legends']"  [attr.rowspan]="columns_length" ></tr>
+                </table>
+                <!-- <div *ngIf="insights.driverheatlist.length === 0" style="text-align: center;font-size: 20px;font-weight: 600;">
+                    No Data Found for this Driver for entered range
+                </div> -->
+                <!-- <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+                    <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+                        <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+                        <span style="margin-left: 10px;">{{item.label}}</span>
+                    </div>
+                    <div  style="display: flex;align-items: center;">
+                        <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+                        <span style="margin-left: 10px;">No response</span>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <div style="height: 100%;position: absolute;top: 0;left: 0;" class="loading-shade" *ngIf="insights.loading">
+            <div class="d-flex justify-content-center align-items-center w-100" style="height: 300px;">
+                <div>
+                  <mat-spinner></mat-spinner>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div style="display: flex;align-items: center;justify-content: center;padding: 20px;">
+        <div *ngFor="let item of insights.rules[insights.hightlightCellRuleSelected]" style="display: flex;align-items: center;">
+            <div class="colorBox" style="margin-left: 10px;" [style.background]="item.bg"></div>
+            <span style="margin-left: 10px;">{{item.label}}</span>
+        </div>
+        <div  style="display: flex;align-items: center;">
+            <div class="colorBox" style="margin-left: 10px;" [style.background]="'#b5b1b1'"></div>
+            <span style="margin-left: 10px;">No response</span>
+        </div>
+    </div> -->
+</mat-card>

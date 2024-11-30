@@ -1,0 +1,49 @@
+::ng-deep .date-filter-modal-toolbar {
+    background: #32adda;
+    color: #fff;
+    border: 0 !important;
+    display: flex;
+    justify-content: space-between;
+    mat-icon{
+        color: #fff;
+    }
+  }
+  
+  ::ng-deep .date-filter-modal-tabs {
+      overflow: auto;
+      .mat-ink-bar{
+          background: #fff !important;
+      }
+      .mat-tab-labels {
+        background: #32adda;
+        .mat-tab-label {
+          font-weight: bold;
+          color: #fff;
+        }
+      }
+  
+      h3{
+          color: rgba(0, 0, 0, 0.54) !important;
+      }
+  
+      .mat-select-value{
+          color: rgba(0, 0, 0, 0.54) !important;
+      }
+  
+  
+  }
+  
+  ::ng-deep .date-filter-modal-footer{
+      display: flex;
+      justify-content: flex-end;
+  }
+  
+  // ::ng-deep .mat-radio-label-content{
+  //   padding-left: 13px!important;
+  // }
+  
+  ::ng-deep .filter-by-btns {
+    .mat-radio-label-content{
+      padding-left: 13px!important;
+    }
+  }

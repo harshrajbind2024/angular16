@@ -1,0 +1,2 @@
+<app-multi-chart (filterEvent)="updateFilter($event)" [filters]="filters" [type]="'hr'"  [empType]="this.auth.getEmpType()" (filtersEvent)="updateFilters($event)"  (dataPlotClickEvent)="dataPlotClick($event)"></app-multi-chart>
+<app-list-view #listview [filter]="filter" [filters]="filters" [type]="'hr'"  [empType]="this.auth.getEmpType()"  [displayedColumns]="listViewColumns" [dataPlotObj]="dataPlotObj"  (changeDataPlotObj)="changeDataPlotObj($event)" (recordActionEvent)="openActionModal($event)"></app-list-view>

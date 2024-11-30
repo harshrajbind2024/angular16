@@ -1,0 +1,324 @@
+<div class="d-flex flex-1 h-100">
+  <div class="pb-1 pl-1 pos-rel pt-1">
+    <mat-card class="d-flex flex-1 flex-column h-100 mat-card" style="box-sizing: border-box;max-width: 300px;">
+      <form [formGroup]="commentForm" *ngIf="showForm">
+        <mat-form-field class="w-100">
+          <mat-select placeholder="All Comments" formControlName="comments">
+            <mat-option value="all">
+              All
+            </mat-option>
+            <mat-option *ngFor="let comment of comments" [value]="comment.id">
+              {{comment.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="w-100" *ngIf="factors.length > 0">
+          <mat-select placeholder="Factors" formControlName="factors">
+            <mat-option value="all">
+              All
+            </mat-option>
+            <mat-option *ngFor="let comment of factors" [value]="comment.id">
+              {{comment.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="w-100" *ngIf="subFactors.length > 0">
+            <mat-select placeholder="Drivers" formControlName="subFactors">
+              <mat-option value="all">
+                All
+              </mat-option>
+              <mat-option *ngFor="let comment of subFactors" [value]="comment.id">
+                {{comment.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        <button mat-raised-button color="primary" class="w-100 mb-1" (click)="getTotalComments()">
+          Submit
+        </button>
+      </form>
+      <button mat-raised-button *ngIf="totalNoOfComments > 0" color="primary" class="w-100" (click)="export()">
+          Export
+      </button>
+    </mat-card>
+  </div>
+  <div class="flex-1 overflow-auto">
+    <ng-container *ngIf="showComments">
+      <p *ngIf="totalNoOfComments > 0" style="margin: 15px 0 0 20px; font-size: small;color: black;"><b>Sentiment</b></p>
+      <p *ngIf="totalNoOfComments > 0" style="margin: 3px 0 0 20px; font-size: small;color: grey;">Click on specific Sentiment to filter commonly used word and comments</p>
+      <div style="padding: 0px 10px 10px 0;text-align: center;" [style.margin]="totalNoOfComments==0 ? '16px 16px 16px 16px':'5px 16px 16px 16px'">
+        <div  class="mat-elevation-z4 " [ngClass]="{'positive1': isPositive,'positive': !isPositive}" (click)="viewComments('1')">
+          <h1><span style="font-size: 20px;" [ngClass]="{'poscomment1':isPositive,'poscomment':!isPositive}" >Positive Comments</span></h1>
+          <h1 style="text-align: center; position: relative;"><span style="font-size: 36px;" [ngClass]="{'posnumber1':isPositive,'posnumber':!isPositive}" >{{totalNoOfPosComments}}</span>
+            <span class="comment-percent" *ngIf="posPercent">{{posPercent}} %</span>
+            <span class="comment-percent" style="color:transparent" *ngIf="!posPercent">-</span>
+          </h1>
+          <span style="font-size: 11px;" *ngIf="posDiff"><span [style.color]="posDiff['color']">{{posDiff.number}} </span>{{posDiff.sentence}} {{cap2}}</span>
+          <span style="font-size: 11px; color:transparent" *ngIf="!posDiff">-</span>
+        </div>
+        <div  class="mat-elevation-z4 " [ngClass]="{'negative1': isNegative,'negative': !isNegative}" (click)="viewComments('3')">
+          <h1><span style="font-size: 20px;" [ngClass]="{'negcomment1': isNegative,'negcomment': !isNegative}">Negative Comments</span></h1>
+          <h1 style="text-align: center; position: relative;"><span style="font-size: 36px;" [ngClass]="{'negnumber1': isNegative,'negnumber': !isNegative}">{{totalNoOfNegComments}}</span>
+            <span class="comment-percent" *ngIf="negPercent">{{negPercent}} %</span>
+            <span class="comment-percent" style="color:transparent" *ngIf="!negPercent">-</span>
+          </h1>
+          <span style="font-size: 11px;" *ngIf="negDiff"><span [ngStyle]="{'color': negDiff['color'] === 'red' ? 'green':'red'}" >{{negDiff.number}} </span>{{negDiff.sentence}} {{cap2}}</span>
+          <span style="font-size: 11px; color:transparent" *ngIf="!negDiff">-</span>
+        </div>
+        <div  class="mat-elevation-z4 " [ngClass]="{'neutral1': isNeutral,'neutral': !isNeutral}" (click)="viewComments('2')">
+          <h1><span style="font-size: 20px;" [ngClass]="{'neucomment1': isNeutral,'neucomment': !isNeutral}">Neutral Comments</span></h1>
+          <h1 style="text-align: center; position: relative;"><span style="font-size: 36px;" [ngClass]="{'neunumber1': isNeutral,'neunumber': !isNeutral}">{{totalNoOfNeuComments}}</span>
+            <span class="comment-percent" *ngIf="neuPercent">{{neuPercent}} %</span>
+            <span class="comment-percent" style="color:transparent" *ngIf="!neuPercent">-</span>
+          </h1>
+          <span style="font-size: 11px;" *ngIf="neuDiff"><span [style.color]="neuDiff['color']">{{neuDiff.number}} </span>{{neuDiff.sentence}} {{cap2}}</span>
+          <span style="font-size: 11px; color:transparent" *ngIf="!neuDiff">-</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 68%; align-items: center; ">
+        <p *ngIf="totalNoOfComments > 0 && intentWords.length>0" style="margin: 0 0 0 20px; font-size: small;color: black;"><b>Commonly mentioned words</b></p>
+        <div style="display: flex; align-items: center;" *ngIf="totalNoOfComments > 0 && intentWords.length>0" class="headerZoom">
+          <mat-icon class="download-icon" (click)="createWordCloud()">launch</mat-icon>
+          <span style="font-weight: bold; cursor: pointer;" (click)="createWordCloud()">Create Word Cloud</span>
+        </div>
+      </div>
+
+      <p *ngIf="totalNoOfComments > 0 && intentWords.length>0" style="margin: 3px 0 0 20px; font-size: small;color: grey;">Words are ordered from Highest -> Lowest used. Click on the words to filter comments they are used in</p>
+      <div *ngIf="totalNoOfComments==0" class="m-1" style="padding: 0px 15px 0px 0;text-align: center; font-weight: bold;">{{totalNoOfComments}} Matching Comments</div>
+      <ng-container *ngIf="totalNoOfComments > 0 && intentWords.length>0">
+        <div class="d-flex flex-row paging" *ngIf="(isPositive || isNegative)||(isNeutral)" style="margin: 5px 16px 16px 16px;">
+          <ngu-carousel [inputs]="carouselConfig" [dataSource]="intentWords" class="sentiment-carousel">
+            <ngu-item *nguCarouselDef="let word; let i=index " style="width:auto!important;padding:5px!important;">
+              <button style="padding: 0 5px;" *ngIf="selectIndex[i]==0" mat-button mat-raised-button [ngClass]="{'positivebtn': isPositive,'negativebtn': isNegative,'neutralbtn': isNeutral}" (click)="selectWord(i,word.Entities)"><strong>{{word.Entities}} ({{word.count}})</strong></button>
+              <button style="padding: 0 5px;" *ngIf="selectIndex[i]==1" mat-button mat-raised-button [ngClass]="{'positivebtn1': isPositive,'negativebtn1': isNegative,'neutralbtn1': isNeutral}" (click)="selectWord(i,word.Entities)"><strong>{{word.Entities}} ({{word.count}})</strong></button>
+            </ngu-item>
+            <button NguCarouselPrev class='leftRs'>&lt;</button>
+            <button NguCarouselNext class='rightRs'>&gt;</button>
+          </ngu-carousel>
+        </div>
+        <div class="d-flex flex-row paging" *ngIf="(!isPositive && !isNegative)&&(!isNeutral)" style="margin: 5px 16px 16px 16px;">
+          <ngu-carousel [inputs]="carouselConfig" [dataSource]="intentWords" class="sentiment-carousel">
+            <ngu-item *nguCarouselDef="let word; let i=index " style="width:auto!important;padding:5px!important;">
+              <button style="padding: 0 5px;" *ngIf="selectIndex[i]==0" mat-button mat-raised-button [ngClass]="{'positivebtn': word.Score=='1','negativebtn': word.Score=='3','neutralbtn': word.Score=='2'}" (click)="selectWord(i,word.Entities,word.Score)" ><strong>{{word.Entities}} ({{word.count}})</strong></button>
+              <button style="padding: 0 5px;" *ngIf="selectIndex[i]==1" mat-button mat-raised-button [ngClass]="{'positivebtn1': word.Score=='1','negativebtn1': word.Score=='3','neutralbtn1': word.Score=='2'}" (click)="selectWord(i,word.Entities,word.Score)" ><strong>{{word.Entities}} ({{word.count}})</strong></button>
+            </ngu-item>
+            <button NguCarouselPrev class='leftRs'>&lt;</button>
+            <button NguCarouselNext class='rightRs'>&gt;</button>
+          </ngu-carousel>
+        </div>
+      </ng-container>
+      <p *ngIf="selectedIntent || selectedWord" style="margin: 2px 0 0 20px; font-size: small;color: black;"><b>You can remove filters here:</b></p>
+      <div class="d-flex flex-row paging filter1" *ngIf="selectedIntent" style="margin-left: 16px !important;">
+        <mat-chip-list>
+          <mat-chip removable="true">
+              {{selectedIntent}}
+              <mat-icon matChipRemove (click)="removeSelectedIntent()">cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+      <div class="d-flex flex-row paging filter2" *ngIf="selectedWord" [style.margin-left]="selectedIntent?'':'16px'">
+        <mat-chip-list>
+          <mat-chip removable="true">
+              {{selectedWord}}
+              <mat-icon matChipRemove (click)="removeSelectedWord()">cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+      <ng-container *ngIf="!gettingResults">
+        <div *ngIf="length > 0" class="d-flex flex-row m-1 paging">
+          <mat-paginator class="sentiment-page" [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex - 1" (page)="changePage(pageEvent = $event)">
+          </mat-paginator>      
+        </div>
+        <ng-container *ngFor="let comment of commentsList; let i = index">
+          <mat-card class="d-flex flex-row m-1 mat-card" style="display: flex !important; align-items: center;">
+            <div class="d-flex flex-column flex-1">
+              <div class="d-flex flex-row justify-content-space-between">
+                <div class="align-items-center d-flex">
+                  <mat-icon class="fiber_manual_record" [class.negative-color]="comment.score === 'negative'" [class.positive-color]="comment.score === 'positive'" [class.neutral-color]="comment.score === 'neutral'">fiber_manual_record</mat-icon>
+                  <h4 style="margin: 0;">
+                    <ng-container *ngIf="comment.anonymous === 'Open'">
+                      {{comment.name}}
+                    </ng-container>
+                    <ng-container *ngIf="comment.anonymous !== 'Open'">
+                      Anonymous
+                    </ng-container>
+                  </h4>
+                </div>
+                <div class="d-flex align-items-center" *ngIf="comment.anonymous === 'Open'">
+                  <button mat-icon-button color="primary" (click)="showEmployeeDetails(comment.pk)">
+                    <mat-icon>assignment_ind</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <p class="mb-0"><b>Question:</b> {{comment.question}}</p>
+              <div class="d-flex flex-row m-0 p-0">
+                <p class="mr-1"><b>Factor:</b> {{comment.factor}}</p>
+                <p class="mr-1"><b>Driver:</b> {{comment.driver}}</p>
+                <p><b>Completed On:</b> {{comment.completedOn | date:'dd/MM/yy hh:mm a'}}</p>
+              </div>
+              <p class="mt-0"><b>Comment:</b> {{firstLetterUpper(comment.comment)}}</p>
+              <div class="d-flex tags" *ngIf="!(comment.tag)">
+                <svg *ngIf="comment.anonymous === 'Open'" height="512pt" (click)="showAcknowledgeDialog(comment.pk)" viewBox="0 0 512 512.001" width="512pt" xmlns="http://www.w3.org/2000/svg" [matTooltipClass]="'tooltip'" (click)="tooltip3.toggle()" #tooltip3="matTooltip" [matTooltipPosition]="'below'"
+                matTooltip="Record Action" class="mr-1 popIcons">
+                  <path d="m512 256c0 141.386719-114.613281 256-256 256-141.382812 0-256-114.613281-256-256s114.617188-256 256-256c141.386719 0 256 114.613281 256 256zm0 0"
+                    fill="#ff9a00" />
+                  <path d="m512 256c0-21.121094-2.574219-41.636719-7.398438-61.273438l-110.773437-109.710937c-4.832031-5.273437-11.769531-8.597656-19.441406-8.597656h-40.886719l-20.230469-20.082031h-114.539062v20.082031h-61.113281c-14.515626 0-26.386719 11.875-26.386719 26.386719v304.808593c0 7.796875 3.425781 14.828125 8.847656 19.667969l77.722656 78.070312c18.699219 4.347657 38.179688 6.648438 58.199219 6.648438 141.386719 0 256-114.613281 256-256zm0 0"
+                    fill="#e67500" />
+                  <path d="m374.386719 434h-236.769531c-14.515626 0-26.386719-11.871094-26.386719-26.386719v-304.808593c0-14.515626 11.871093-26.386719 26.386719-26.386719h236.769531c14.511719 0 26.382812 11.871093 26.382812 26.386719v304.808593c0 14.515625-11.871093 26.386719-26.382812 26.386719zm0 0"
+                    fill="#00ceb4" />
+                  <path d="m400.769531 102.800781v304.808594c0 14.519531-11.867187 26.390625-26.378906 26.390625h-118.390625v-357.578125h118.390625c14.511719 0 26.378906 11.867187 26.378906 26.378906zm0 0"
+                    fill="#00ad95" />
+                  <path d="m129.757812 93.503906h252.488282v323.410156h-252.488282zm0 0" fill="#fff" />
+                  <g fill="#ffe047">
+                    <path d="m195.175781 209.328125-47.550781-41.839844 19.820312-22.523437 25.554688 22.488281 32.289062-34.609375 22.046876 20.34375zm0 0" />
+                    <path d="m195.175781 285.8125-47.550781-41.839844 19.820312-22.523437 25.554688 22.488281 32.289062-34.609375 22.046876 20.347656zm0 0" />
+                    <path d="m195.175781 362.300781-47.550781-41.84375 19.820312-22.519531 25.554688 22.484375 32.289062-34.609375 22.046876 20.347656zm0 0" />
+                  </g>
+                  <path d="m256 93.5h126.242188v323.410156h-126.242188zm0 0" fill="#fff5cb" />
+                  <path d="m129.757812 384.636719h252.488282v32.277343h-252.488282zm0 0" fill="#fff5ca" />
+                  <path d="m256 384.632812h126.246094v32.28125h-126.246094zm0 0" fill="#ffe047" />
+                  <path d="m198.730469 56.332031h114.539062v60.972657h-114.539062zm0 0" fill="#ff52a1" />
+                  <path d="m268.019531 174.238281h90.5v30h-90.5zm0 0" fill="#9331b2" />
+                  <path d="m268.019531 239.570312h90.5v30h-90.5zm0 0" fill="#9331b2" />
+                  <path d="m268.019531 304.90625h90.5v30h-90.5zm0 0" fill="#9331b2" />
+                  <path d="m256 56.328125h57.269531v60.980469h-57.269531zm0 0" fill="#e80c6a" />
+                </svg>
+              </div>
+              <p *ngIf="comment.tag">
+                <ng-container *ngIf="comment.tag === 1">
+                  Marked as <b>Great Idea</b>
+                </ng-container>
+                <ng-container *ngIf="comment.tag === 2">
+                  Marked as <b>Complaint</b>
+                </ng-container>
+                <ng-container *ngIf="comment.tag === 3">
+                  Marked as <b>Working on it</b>
+                </ng-container>
+              </p> 
+            </div>
+          </mat-card>
+        </ng-container>
+      </ng-container>
+      <ng-container *ngIf="gettingResults">
+        <div class="w-100 mt-2 d-flex align-items-center justify-content-center">
+          <mat-spinner></mat-spinner>
+        </div>
+      </ng-container>
+    </ng-container>
+    <div *ngIf="isCommentReport" class="mt-2 d-flex align-items-center justify-content-center">
+      <h2 style="font-weight: 200;">{{reportErrorMsg}}</h2>
+    </div>
+    <ng-container *ngIf="!showComments">
+      <mat-card class="m-1 mat-card">
+        <mat-card-content class="mb-0">
+          <div class="d-flex align-items-center">
+            <svg height="512pt" viewBox="0 0 512 512" width="512pt" xmlns="http://www.w3.org/2000/svg" class="mr-1 popIcons">
+              <path d="m512 256c0 141.386719-114.613281 256-256 256s-256-114.613281-256-256 114.613281-256 256-256 256 114.613281 256 256zm0 0"
+                fill="#9331b2"></path>
+              <path d="m512 256c0-1.445312-.03125-2.882812-.054688-4.324219l-160.550781-160.550781c-23.398437-26.253906-57.460937-42.792969-95.394531-42.792969-70.554688 0-127.746094 57.195313-127.746094 127.746094 0 33.796875 13.132813 64.515625 34.5625 87.355469l30.628906 30.578125v35.972656h-25.71875v32.386719l19.683594 18.753906v18.144531c0 9.308594 4.417969 17.585938 11.269532 22.855469l88.277343 88.007812c126.785157-15.285156 225.042969-123.226562 225.042969-254.132812zm0 0"
+                fill="#681f7b"></path>
+              <path d="m258.539062 458.667969h-5.078124c-17.890626 0-32.390626-14.503907-32.390626-32.390625h69.859376c0 17.886718-14.5 32.390625-32.390626 32.390625zm0 0"
+                fill="#c8c6cc"></path>
+              <path d="m290.929688 426.28125c0 .609375-.019532 1.21875-.050782 1.820312-.457031 8.207032-3.980468 15.617188-9.4375 21.078126-5.863281 5.859374-13.960937 9.492187-22.902344 9.492187h-2.539062v-32.390625zm0 0"
+                fill="#aeadb3"></path>
+              <path d="m295.753906 428.101562h-79.507812c-15.925782 0-28.832032-12.90625-28.832032-28.832031v-42.929687h137.171876v42.929687c0 15.925781-12.90625 28.832031-28.832032 28.832031zm0 0"
+                fill="#e1e1e3"></path>
+              <path d="m324.589844 356.339844v42.929687c0 15.921875-12.910156 28.832031-28.839844 28.832031h-39.75v-71.761718zm0 0"
+                fill="#c8c6cc"></path>
+              <path d="m383.746094 176.078125c0-70.550781-57.191406-127.746094-127.746094-127.746094s-127.746094 57.195313-127.746094 127.746094c0 47.828125 26.285156 89.507813 65.191406 111.402344v52.664062h125.109376v-52.664062c38.90625-21.894531 65.191406-63.574219 65.191406-111.402344zm0 0"
+                fill="#ffe670"></path>
+              <path d="m383.75 176.078125c0 47.832031-26.289062 89.5-65.199219 111.402344v52.667969h-62.550781v-291.820313c70.550781 0 127.75 57.203125 127.75 127.75zm0 0"
+                fill="#ffd400"></path>
+              <path d="m299.753906 175.285156c0-24.164062-19.589844-43.75-43.753906-43.75s-43.753906 19.585938-43.753906 43.75c0 18.894532 11.980468 34.984375 28.753906 41.105469v123.757813h30v-123.757813c16.773438-6.121094 28.753906-22.210937 28.753906-41.105469zm0 0"
+                fill="#fec000"></path>
+              <path d="m299.75 175.289062c0 18.890626-11.980469 34.980469-28.75 41.101563v123.757813h-15v-208.617188c24.160156 0 43.75 19.589844 43.75 43.757812zm0 0"
+                fill="#ff9a00"></path>
+              <path d="m167.726562 329.984375h176.546876v32.386719h-176.546876zm0 0" fill="#c8c6cc"></path>
+              <path d="m256 329.988281h88.269531v32.382813h-88.269531zm0 0" fill="#aeadb3"></path>
+            </svg>
+            <h4>Acknowledge Comment</h4>
+          </div>
+          <mat-form-field class="w-100">
+            <textarea matInput placeholder="Leave a comment"></textarea>
+            <mat-hint align="start"><strong>This will send an email to an emomployee.</strong></mat-hint>
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary">Acknowledge</button>
+        </mat-card-actions>
+      </mat-card>
+      <mat-card class="m-1 mat-card">
+        <mat-card-content class="mb-0">
+          <div class="d-flex align-items-center">
+            <svg height="512pt" viewBox="0 0 512 512" width="512pt" xmlns="http://www.w3.org/2000/svg" class="mr-1 popIcons">
+              <path d="m0 256c0-141.386719 114.613281-256 256-256s256 114.613281 256 256c0 110.457031-69.957031 204.574219-167.980469 240.464844-27.445312 10.050781-57.089843-10.964844-88.019531-10.964844-23.089844 0-69.191406 17.039062-69.601562 16.925781-107.5625-30.320312-186.398438-129.167969-186.398438-246.425781zm0 0"
+                fill="#9331b2" />
+              <path d="m512 256c0-17.203125-1.710938-34.007812-4.945312-50.261719l-102.558594-102.558593-23.726563-14.707032-30.527343 49.238282-80.285157-80.023438h-27.914062v80.023438l29.804687 26.9375c-1.871094.859374-3.640625 1.945312-5.269531 3.257812-4.765625-5.21875-11.589844-8.273438-18.710937-8.273438-6.050782 0-11.757813 2.101563-16.3125 5.960938-4.796876-4.996094-11.375-7.804688-18.390626-7.761719-3.914062.023438-7.601562.957031-10.890624 2.597657l-71.039063-71.957032-23.726563 14.707032 42.164063 68.015624 34.503906 36.589844c-.664062-.441406-1.375-.78125-2.136719-1.007812-7.222656-2.117188-15.578124 1.726562-19.300781 6.425781-10.390625 13.128906-4.125 39.78125-4.058593 40.101563 7.0625 32.957031 33.511718 58.300781 40.765624 64.957031.476563.515625.945313 1.019531 1.402344 1.503906v17.175781h-14.4375v165.488282c.242188.066406 36.089844-16.929688 69.589844-16.929688s62.3125 20.6875 90.429688 10.070312c96.757812-36.539062 165.570312-130.019531 165.570312-239.570312zm0 0"
+                fill="#681f7b" />
+              <path d="m107.503906 103.175781 23.722656-14.710937 42.164063 68.015625-23.722656 14.707031zm0 0" fill="#fff" />
+              <path d="m338.601562 156.496094 42.167969-68.011719 23.722657 14.710937-42.164063 68.011719zm0 0" fill="#fff5cb" />
+              <path d="m242.042969 57.6875h27.914062v80.023438h-27.914062zm0 0" fill="#fff" />
+              <path d="m256 57.691406h13.960938v80.019532h-13.960938zm0 0" fill="#fff5cb" />
+              <path d="m340.785156 187.851562c-3.460937-9.164062-11.769531-15.785156-21.53125-16.632812-5.394531-.464844-10.613281.722656-15.136718 3.402344-4.539063-7.542969-12.789063-12.285156-21.699219-12.285156-5.820313 0-11.359375 1.960937-15.839844 5.566406-4.769531-5.21875-11.589844-8.269532-18.710937-8.269532-6.054688 0-11.757813 2.097657-16.316407 5.960938-4.792969-5-11.371093-7.804688-18.386719-7.765625-14.011718.082031-25.160156 11.84375-25.160156 25.851563v28.355468c-1.515625-2.496094-3.46875-4.527344-5.964844-5.257812-7.222656-2.117188-15.582031 1.726562-19.300781 6.425781-10.394531 13.128906-4.128906 39.78125-4.058593 40.101563 7.644531 35.675781 38.03125 62.457031 42.164062 66.230468v48.636719h131.433594v-56.699219c0-6.371094.238281-12.738281.714844-19.089844l7.8125-104.484374zm0 0"
+                fill="#ffdba9" />
+              <path d="m340.800781 187.894531-7.8125 104.492188c-.46875 6.347656-.707031 12.71875-.707031 19.089843v56.6875h-76.28125v-207.167968c4.019531 1.359375 7.679688 3.738281 10.578125 6.910156 4.480469-3.609375 10.023437-5.570312 15.84375-5.570312 8.90625 0 17.15625 4.738281 21.699219 12.28125 4.519531-2.671876 9.738281-3.859376 15.140625-3.402344 9.75.851562 18.058593 7.472656 21.527343 16.632812zm0 0"
+                fill="#ffc473" />
+              <path d="m186.410156 336.828125v165.597656c22.125 6.347657 45.46875 9.574219 69.589844 9.574219 31.84375 0 62.304688-5.804688 90.429688-16.429688l.011718-158.632812zm0 0"
+                fill="#00efd1" />
+              <path d="m346.441406 336.9375-.011718 158.632812c-28.121094 10.621094-58.589844 16.429688-90.429688 16.429688v-175.0625zm0 0"
+                fill="#00ceb4" />
+              <path d="m323.554688 385.332031c0 12.335938-10 22.332031-22.335938 22.332031-12.332031 0-22.332031-9.996093-22.332031-22.332031 0-12.332031 10-22.332031 22.332031-22.332031 12.335938 0 22.335938 10 22.335938 22.332031zm0 0"
+                fill="#008878" /></svg>
+            <h4>Acknowledge Comment</h4>
+          </div>
+          <mat-form-field class="w-100">
+            <textarea matInput placeholder="Leave a comment"></textarea>
+            <mat-hint align="start"><strong>This will send an email to an emomployee.
+              </strong></mat-hint>
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary">Acknowledge</button>
+        </mat-card-actions>
+      </mat-card>
+      <mat-card class="m-1 mat-card">
+        <mat-card-content class="mb-0">
+          <div class="d-flex align-items-center">
+            <svg height="512pt" viewBox="0 0 512 512.001" width="512pt" xmlns="http://www.w3.org/2000/svg" class="mr-1 popIcons">
+              <path d="m512 256c0 141.386719-114.613281 256-256 256-141.382812 0-256-114.613281-256-256s114.617188-256 256-256c141.386719 0 256 114.613281 256 256zm0 0"
+                fill="#ff9a00" />
+              <path d="m512 256c0-21.121094-2.574219-41.636719-7.398438-61.273438l-110.773437-109.710937c-4.832031-5.273437-11.769531-8.597656-19.441406-8.597656h-40.886719l-20.230469-20.082031h-114.539062v20.082031h-61.113281c-14.515626 0-26.386719 11.875-26.386719 26.386719v304.808593c0 7.796875 3.425781 14.828125 8.847656 19.667969l77.722656 78.070312c18.699219 4.347657 38.179688 6.648438 58.199219 6.648438 141.386719 0 256-114.613281 256-256zm0 0"
+                fill="#e67500" />
+              <path d="m374.386719 434h-236.769531c-14.515626 0-26.386719-11.871094-26.386719-26.386719v-304.808593c0-14.515626 11.871093-26.386719 26.386719-26.386719h236.769531c14.511719 0 26.382812 11.871093 26.382812 26.386719v304.808593c0 14.515625-11.871093 26.386719-26.382812 26.386719zm0 0"
+                fill="#00ceb4" />
+              <path d="m400.769531 102.800781v304.808594c0 14.519531-11.867187 26.390625-26.378906 26.390625h-118.390625v-357.578125h118.390625c14.511719 0 26.378906 11.867187 26.378906 26.378906zm0 0"
+                fill="#00ad95" />
+              <path d="m129.757812 93.503906h252.488282v323.410156h-252.488282zm0 0" fill="#fff" />
+              <g fill="#ffe047">
+                <path d="m195.175781 209.328125-47.550781-41.839844 19.820312-22.523437 25.554688 22.488281 32.289062-34.609375 22.046876 20.34375zm0 0" />
+                <path d="m195.175781 285.8125-47.550781-41.839844 19.820312-22.523437 25.554688 22.488281 32.289062-34.609375 22.046876 20.347656zm0 0" />
+                <path d="m195.175781 362.300781-47.550781-41.84375 19.820312-22.519531 25.554688 22.484375 32.289062-34.609375 22.046876 20.347656zm0 0" />
+              </g>
+              <path d="m256 93.5h126.242188v323.410156h-126.242188zm0 0" fill="#fff5cb" />
+              <path d="m129.757812 384.636719h252.488282v32.277343h-252.488282zm0 0" fill="#fff5ca" />
+              <path d="m256 384.632812h126.246094v32.28125h-126.246094zm0 0" fill="#ffe047" />
+              <path d="m198.730469 56.332031h114.539062v60.972657h-114.539062zm0 0" fill="#ff52a1" />
+              <path d="m268.019531 174.238281h90.5v30h-90.5zm0 0" fill="#9331b2" />
+              <path d="m268.019531 239.570312h90.5v30h-90.5zm0 0" fill="#9331b2" />
+              <path d="m268.019531 304.90625h90.5v30h-90.5zm0 0" fill="#9331b2" />
+              <path d="m256 56.328125h57.269531v60.980469h-57.269531zm0 0" fill="#e80c6a" />
+            </svg>
+            <h4>Acknowledge Comment</h4>
+          </div>
+          <mat-form-field class="w-100">
+            <textarea matInput placeholder="Leave a comment"></textarea>
+            <mat-hint align="start"><strong>This will send an email to an emomployee.</strong></mat-hint>
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary">Acknowledge</button>
+        </mat-card-actions>
+      </mat-card>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,192 @@
+.headerr {
+    font-weight: 600;
+    font-size: 22px;
+    margin-top: 20px;
+}
+
+::ng-deep{
+    .wordcloud-stepper {
+        .mat-step-icon .mat-icon{
+            color: white;
+            padding-left:0px !important;
+        }
+        .mat-form-field {
+            width: auto;
+        }
+        .mat-horizontal-content-container{
+            padding-bottom: 15px !important;
+        }
+        .mat-horizontal-stepper-header-container{
+            // border-bottom: 1px solid #ccc;
+            padding-top: 6px;
+            padding-right: 10px;
+            padding-left: 10px;
+            // padding-bottom: 2px;
+        }
+        .mat-step-icon-state-edit {
+            background-color: #72A230 !important;
+        }
+        .mat-step-header .mat-step-icon-state-done {
+            background-color: green; 
+        }
+        .mat-horizontal-stepper-header{
+            pointer-events: none;
+        }
+        .mat-select-value {
+            color:black;
+        }
+        .mat-select-arrow {
+            color: rgba(0, 0, 0, 0.54);
+        }
+
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background: white;
+            opacity: 1;
+            z-index: 1;
+        }
+        th, td { padding: 8px 16px; }
+    }
+    table { border-collapse: separate; }
+    .mat-cell,.mat-header-cell{
+        width: 200px;
+        text-align: center;
+    }
+
+
+    // td.mat-cell:not(.mat-cell:first-of-type, th.mat-header-cell){
+    //     min-width: 140px;
+    // }
+
+    // td.mat-cell:first-of-type, td.mat-footer-cell:first-of-type, th.mat-header-cell:first-of-type {
+    //     white-space: nowrap;
+    //     // padding-left: 10px;
+    //     min-width: 170px !important;
+    //     font-size: 13px;
+    // }
+    // th.mat-header-cell.cdk-column-head.mat-column-head.ng-star-inserted {
+    //     text-align: center;
+    //     font-size: 16px;
+    //     font-weight: bold;
+    //     margin-bottom: 15px;
+    //     text-shadow: 0 0 black;
+    // }
+
+    // .mat-dialog-container {
+    //     padding: unset;
+    //     overflow: hidden;
+    //     width: 100%;
+    // }
+}
+
+
+::ng-deep .customize-table {
+    overflow: auto;
+    // max-height: 380px;
+    max-height: 400px;
+    margin: auto;
+    // margin-top: 25px;
+    margin-bottom: 8px;
+    position: relative;
+    text-align: center;
+
+
+    .mat-table {
+        border-radius: 16px;
+        color: #060011;
+        width: max-content;
+        display: inline-block;
+    }
+    tr.mat-header-row {
+        // height: 50px;
+        height: 40px;
+        background-color: #32adda;
+        color: #fff;
+    }
+    tr.mat-row {
+        // height: 40px;
+        height: 35px;
+    }
+    .mat-header-cell{
+        font-size: 15px;
+        vertical-align: middle;
+        text-align: center;
+        color : white;
+        font-weight: 600;
+    }
+    .mat-cell{
+        border-bottom: lightgray solid 1px;
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .mat-form-field-appearance-outline .mat-form-field-infix {
+        padding: 0.2em 0 0.2em 0 !important;
+    }
+    .mat-form-field {
+        width: 35%;
+        text-align: center;
+    }
+    .mat-form-field-appearance-outline .mat-form-field-wrapper {
+        margin: unset;
+    }
+    .mat-form-field-wrapper {
+        padding-bottom: unset;
+    }
+}
+
+.close {
+    color: darkgray;
+}
+.close:hover {
+    color: darkslategray;
+}
+.headerZoom{
+    transition: 0.3s ease;
+    font-size: 14px; 
+    color: #5097da; 
+    font-weight: bold;
+}
+.headerZoom:hover{
+    transform: scale(1.1);
+    color: #5097da;
+}
+::ng-deep .headerZoom .mat-button-focus-overlay {
+    background: unset !important;
+}
+.color {
+    // color: #000;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+.search-box{
+    width: 90%;
+    margin: 5% 0% 3% 3%;
+}
+.custom-input {
+    height: 26px;
+}
+.loading-shade {
+    position: absolute;
+    top: 5%;
+    left: 50px;
+    bottom: 0px;
+    right: 50px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    -webkit-transform: scale(0.8);
+    transform: scale(0.8);
+}
+.download-icon {
+    height: 20px;
+    width: 9px;
+    font-size: 19px;
+    transition: 0.3s ease;
+    // color: #5097da; 
+    cursor: pointer;
+}

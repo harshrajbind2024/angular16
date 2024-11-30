@@ -1,0 +1,189 @@
+<mat-toolbar role="heading" class="header">
+  <span>Details of Action Required and Closed</span>
+  <span class="spacer"></span>
+  <ng-container *ngIf="!noDataPresent">
+    <button mat-button (click)="closeDialog()">Cancel</button>
+    <button mat-button [disabled]="isLoading" (click)="save()">Save</button>
+  </ng-container>
+  <ng-container *ngIf="noDataPresent">
+    <button mat-button (click)="closeDialog()">Cancel</button>
+  </ng-container>
+</mat-toolbar>
+<div>
+<mat-grid-list cols="5" rowHeight="3rem" style="font-size: small;">
+  <mat-grid-tile>
+    <strong>Employee Name:</strong>
+    <p title="{{empName}}">{{empName}}</p>
+  </mat-grid-tile>
+
+  <mat-grid-tile>
+    <strong>{{list.CompanyID}}:</strong>
+    <p title="{{company}}">{{company}}</p>
+  </mat-grid-tile>
+
+  <mat-grid-tile>
+    <!-- <strong>Function:</strong> -->
+    <strong>{{list.FuncID}}:</strong>
+    <p title="{{func}}">{{func}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>{{list.LocID}}:</strong>
+    <p title="{{location}}">{{location}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>{{list.Stage}}:</strong>
+    <p title="{{stage}}">{{stage}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <!-- <strong>Department:</strong> -->
+    <strong>{{list.DeptID}}:</strong>
+    <p title="{{department}}">{{department}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <!-- <strong>Role:</strong> -->
+    <strong>{{list.RoleID}}:</strong>
+    <p title="{{role}}">{{role}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>Designation:</strong>
+    <p>{{designation}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>{{list.Manager}}:</strong>
+    <p title="{{manager}}">{{manager}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>Contact No.:</strong>
+    <p title="{{contact}}">{{contact}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>{{list.HRSpoc}}:</strong>
+    <p title="{{hrspoc}}">{{hrspoc}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>Assigned To:</strong>
+    <p>{{assignedToName}}</p>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <strong>Completed On:</strong>
+    <p>{{completedOn | date:'dd/MM/yy hh:mm a'}}</p>
+  </mat-grid-tile>
+
+  
+</mat-grid-list>
+</div >
+
+<div style="position: relative; margin-left:auto; margin-right:0%; margin-top: -3%;">
+  <button  type="button" (click)="openAssignTo()" #test style="background:none ; margin-top: -30px;" mat-button >
+    <span style="font-weight: bold;font-size: 14px;color:blue; background:none">
+      Assign To >
+    </span>
+  </button>
+</div>
+
+<mat-tab-group [(selectedIndex)]="selectedIndex" #tabGroup>
+  <mat-tab label="Chat">
+    <div class="h-100 overflow-auto p-0-15">
+      <div class="d-flex flex-column" *ngFor="let chat of chat">
+        <div class="chatbot">
+          <div>
+            <img src="assets/icons/bot.jpg" alt="Nikki">
+          </div>
+          <div class="text">
+            {{chat.IntQuestionText}}
+          </div>
+        </div>
+        <div class="user" *ngIf="chat.UserText != '2587354252' && chat.UserText != 'closed'">
+          <div>
+            <img src="assets/icons/user.png" alt="Nikki">
+          </div>
+          <div class="text">
+            <ng-container *ngIf="chat.UserText == '5'"><img src="assets/icons/avatars/5.jpg"></ng-container>
+            <ng-container *ngIf="chat.UserText == '4'"><img src="assets/icons/avatars/4.jpg"></ng-container>
+            <ng-container *ngIf="chat.UserText == '3'"><img src="assets/icons/avatars/3.jpg"></ng-container>
+            <ng-container *ngIf="chat.UserText == '2'"><img src="assets/icons/avatars/2.jpg"></ng-container>
+            <ng-container *ngIf="chat.UserText == '1'"><img src="assets/icons/avatars/1.jpg"></ng-container>
+            <ng-container *ngIf="chat.UserText != '1' && chat.UserText != '2' && chat.UserText != '3' && chat.UserText != '4' && chat.UserText != '5'">{{chat.UserText}}</ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab label="Record Action">
+    <div id="action-content">
+      <form *ngIf="showForm" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="status">
+          <div>
+            <mat-label>
+              <strong>Status:</strong>
+            </mat-label>
+            <mat-radio-group formControlName="status" (change)="statusChanged($event.value)">
+              <mat-radio-button class="mr-1" value="no">Open</mat-radio-button>
+              <mat-radio-button *ngIf="isClosedButton" class="mr-1" value="yes">Closed</mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <div id="dateClosure" class="d-flex">
+            <ng-container *ngIf="actionLibraryData[0].dateofclosure !== ''">
+              <strong>Date of closure of Actions:</strong>&nbsp;
+              <p>{{actionLibraryData[0].dateofclosure | customDate:'dd/MM/yy hh:mm a'}}</p>
+            </ng-container>
+            <ng-container *ngIf="actionLibraryData[0].closedby !== ''">
+              <strong class="ml-2">Closed By:</strong>&nbsp;
+              <p>{{actionLibraryData[0].closedby.name}}({{actionLibraryData[0].closedby.id}})</p>
+            </ng-container>
+          </div>
+        </div>
+        <div id="actionTable" class="flex-1">
+          <table style="width:100%">
+            <tr>
+              <ng-container *ngFor="let colm of displayedColumns">
+                <th>{{colm}}</th>
+              </ng-container>
+            </tr>
+            <ng-container formArrayName="items" *ngFor="let item of form.get('items').controls; let i = index;">
+              <tr [formGroupName]="i">
+                <td>{{actionLibraryData[i+1].badfactor.name}}</td>
+                <td>
+                  <ul class="pl-1">
+                    <li *ngFor="let feedback of actionLibraryData[i+1].feedback">{{feedback}}</li>
+                  </ul>
+                </td>
+                <td>
+                  <mat-form-field>
+                    <mat-select placeholder="Select" formControlName="action"
+                      (selectionChange)="actionChanged($event.value, i+1)">
+                      <ng-container *ngFor="let action of actions">
+                        <mat-option [value]="(action.ActionID).toString()">
+                          {{action.ActionText}}
+                        </mat-option>
+                      </ng-container>
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field>
+                    <textarea matInput matTextareaAutosize matAutosizeMinRows=1
+                      formControlName="description"></textarea>
+                  </mat-form-field>
+                </td>
+                <td>
+                  {{getActionBy(i+1)}}
+                </td>
+                <td>
+                  {{actionLibraryData[i+1].dateofaction | customDate:'dd/MM/yy hh:mm a'}}
+                </td>
+              </tr>
+            </ng-container>
+          </table>
+        </div>
+      </form>
+
+      <div class="loading-shade" *ngIf="isLoading">
+        <mat-spinner [diameter]="80" *ngIf="isLoading"></mat-spinner>
+      </div>
+    </div>
+    <div *ngIf="noDataPresent" class="no-action-required">
+       No Negative Factors Found!!
+    </div>
+  </mat-tab>
+</mat-tab-group>
